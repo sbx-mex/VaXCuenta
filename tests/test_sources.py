@@ -55,13 +55,13 @@ class SourceTests(unittest.TestCase):
     def test_raw_reconciles_to_campaign_and_pre_campaign(self):
         campaign = [r for r in self.records if date(2026,10,1) <= r[1] <= date(2026,11,30)]
         pre = [r for r in self.records if r[1] < date(2026,10,1)]
-        public = json.loads((ROOT / "site/data/dashboard.json").read_text())
+        public = json.loads((ROOT / "data/dashboard.json").read_text())
         self.assertEqual(sum(r[2] for r in campaign), sum(r[2] for r in public["actuals"]))
         self.assertEqual(len(campaign), len(public["actuals"]))
         self.assertEqual(sum(r[2] for r in self.records), sum(r[2] for r in campaign) + sum(r[2] for r in pre))
 
     def test_source_cutoff_and_uniqueness(self):
-        public = json.loads((ROOT / "site/data/dashboard.json").read_text())
+        public = json.loads((ROOT / "data/dashboard.json").read_text())
         campaign = [r for r in self.records if date(2026,10,1)<=r[1]<=date(2026,11,30)]
         self.assertEqual(max(r[1] for r in campaign).isoformat(), public["cutoff"])
         self.assertEqual(len(self.records), len({(r[0],r[1]) for r in self.records}))
@@ -96,7 +96,7 @@ class SourceTests(unittest.TestCase):
         self.assertNotIn("pendiente", self.stores)
 
     def test_missing_week49_is_not_invented(self):
-        public = json.loads((ROOT / "site/data/dashboard.json").read_text())
+        public = json.loads((ROOT / "data/dashboard.json").read_text())
         missing = set(range(40,50)) - {r[1] for r in self.targets}
         self.assertEqual(set(public["sourceSummary"]["missingCampaignWeeks"]), missing)
 
@@ -110,16 +110,16 @@ class SourceTests(unittest.TestCase):
         self.assertEqual(directory["43256"]["region"], "Bajío")
 
     def test_every_campaign_real_ceco_is_preserved(self):
-        public = json.loads((ROOT / "site/data/dashboard.json").read_text())
+        public = json.loads((ROOT / "data/dashboard.json").read_text())
         campaign = [r for r in self.records if date(2026,10,1)<=r[1]<=date(2026,11,30)]
         self.assertEqual({r[0] for r in campaign},{r[0] for r in public["actuals"]})
 
     def test_build_is_idempotent_and_public_data_is_sanitized(self):
         first, audit = build(ROOT)
-        before = (ROOT / "site/data/dashboard.json").read_bytes()
+        before = (ROOT / "data/dashboard.json").read_bytes()
         second, _ = build(ROOT)
         self.assertEqual(first["revision"], second["revision"])
-        self.assertEqual(before, (ROOT / "site/data/dashboard.json").read_bytes())
+        self.assertEqual(before, (ROOT / "data/dashboard.json").read_bytes())
         self.assertEqual(second["cutoff"], audit["cutoff"])
         self.assertEqual(len(second["sourceSummary"]["missingDm"]), len(audit["missingDm"]))
         campaign = [r for r in self.records if date(2026,10,1)<=r[1]<=date(2026,11,30)]
@@ -130,8 +130,8 @@ class SourceTests(unittest.TestCase):
     def test_cumulative_replacement_cannot_drop_campaign_start_or_go_back(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder)
-            (root/"site/data").mkdir(parents=True)
-            (root/"site/data/dashboard.json").write_text(json.dumps({"config":self.config,"cutoff":"2026-10-11","actuals":[["38101","2026-10-01",1000],["38101","2026-10-11",2000]]}))
+            (root/"data").mkdir(parents=True)
+            (root/"data/dashboard.json").write_text(json.dumps({"config":self.config,"cutoff":"2026-10-11","actuals":[["38101","2026-10-01",1000],["38101","2026-10-11",2000]]}))
             with self.assertRaisesRegex(ValueError,"retrocede"):
                 validate_cumulative(root,self.config,[("38101",date(2026,10,1),1000)])
             with self.assertRaisesRegex(ValueError,"perdió"):

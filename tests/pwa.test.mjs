@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import vm from 'node:vm';
 
-const sw=await readFile(new URL('../site/sw.js',import.meta.url),'utf8');
+const sw=await readFile(new URL('../sw.js',import.meta.url),'utf8');
 function environment(online=true){
   const listeners={},store=new Map(),deleted=[],cache={
     addAll:async urls=>urls.forEach(url=>store.set(url,new Response(url))),
@@ -16,7 +16,7 @@ function environment(online=true){
   vm.runInNewContext(sw,context);return {listeners,store,deleted};
 }
 test('manifest start, scope and app id stay relative to a GitHub repository subpath',async()=>{
-  const manifest=JSON.parse(await readFile(new URL('../site/manifest.webmanifest',import.meta.url)));
+  const manifest=JSON.parse(await readFile(new URL('../manifest.webmanifest',import.meta.url)));
   assert.equal(manifest.id,'./');assert.equal(manifest.start_url,'./');assert.equal(manifest.scope,'./');
   assert.equal(manifest.display,'standalone');assert.ok(manifest.icons.some(icon=>icon.purpose==='maskable'));
 });

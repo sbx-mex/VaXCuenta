@@ -1,10 +1,10 @@
 # Validación del proyecto
 
-Entrega inicial: campaña 2026, información real al **11 de octubre**.
+Corrección de publicación y limpieza: campaña 2026, información real al **11 de octubre**.
 
 ## Resultado
 
-**55 pruebas automatizadas aprobadas: 19 de Python y 36 de JavaScript.** La preparación del sitio y la verificación de los archivos de publicación también finalizaron correctamente.
+**66 pruebas automatizadas aprobadas: 30 de Python y 36 de JavaScript.** La preparación del sitio y la verificación de los archivos de publicación también finalizaron correctamente.
 
 | Control | Resultado |
 | --- | --- |
@@ -36,6 +36,17 @@ Se comprobaron de forma independiente las sumas vigentes contra el origen y las 
 
 No se ejecutó una revisión visual en un navegador real, ni el diálogo nativo de impresión o instalación en un dispositivo, durante esta entrega. La PWA y la vista PDF están implementadas y sus archivos y reglas fueron comprobados; su apariencia y los diálogos nativos deben revisarse al abrir el sitio preparado.
 
-No se creó ni se publicó un repositorio externo: la entrega es el proyecto completo solicitado para subir a GitHub. El flujo de publicación está incluido y sus acciones se contrastaron con la documentación oficial vigente.
+Se verificó el repositorio sbx-mex/VaXCuenta en el commit 822d7fd14a55462d0b07175a1a7a320490c9de5e. Los 56 archivos consultados coinciden por huella con la copia usada para la corrección. Esta entrega es un ZIP correctivo para cargar al repositorio; no se alteró el remoto desde esta sesión. El flujo de publicación está incluido y sus acciones se contrastaron con la documentación oficial vigente.
 
 Las notas de los archivos de origen siguen visibles en el tablero y en AUDITORIA.md. Las pruebas aprobadas validan su tratamiento; no convierten una asignación o una meta faltante en un dato confirmado.
+
+## Corrección comprobada
+
+- index.html contiene la app completa en raíz, con todos sus recursos relativos.
+- Se probó la actualización sobre una copia exacta del repositorio vigente y un remoto Git local: se retiraron 33 archivos de site/ y dist/, se guardó el commit y se reconstruyó la publicación.
+- Los tres orígenes CSV/Excel y config.json permanecieron idénticos por SHA-256.
+- La publicación usa la misma entrada, corte y versión PWA de la raíz; no contiene el README ni archivos de origen.
+- El fixture de regresión fue reducido a 6,650 bytes; los datos operativos siguen completos.
+- El ZIP excluye los orígenes que ya existen en el repositorio, para conservarlos al cargar esta corrección.
+
+La vista previa HTML carga de forma autónoma el corte y los indicadores correctos, sin red ni módulos externos, comprobado en un entorno DOM simulado. No sustituye la revisión visual en un navegador real.

@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {prepare,selectStores,aggregate,groupRows,weeklySeries} from '../site/model.mjs';
-const data=JSON.parse(await readFile(new URL('../site/data/dashboard.json',import.meta.url)));
+import {prepare,selectStores,aggregate,groupRows,weeklySeries} from '../model.mjs';
+const data=JSON.parse(await readFile(new URL('../data/dashboard.json',import.meta.url)));
 const audit=JSON.parse(await readFile(new URL('../docs/audit.json',import.meta.url)));
 const prepared=prepare(data);
 test('current publication reconciles all recorded campaign pesos and the true source cutoff',()=>{

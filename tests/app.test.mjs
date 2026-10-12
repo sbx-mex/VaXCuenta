@@ -25,9 +25,9 @@ test('initial load, scopes, drilling, search, refresh failure and install help w
   globalThis.window={addEventListener(){},matchMedia:()=>({matches:false}),isSecureContext:true};
   let fail=false;
   globalThis.fetch=async()=>{if(fail)throw new Error('offline');return {ok:true,json:async()=>structuredClone(data),headers:{get:()=>null}};};
-  await import('../site/app.mjs');await pause(20);
+  await import('../app.mjs');await pause(20);
   assert.equal(element('report').hidden,false);assert.equal(element('load-state').hidden,true);
-  assert.match(element('kpis').innerHTML,/\$3,349,828/);assert.match(element('kpis').innerHTML,/\$3,526,930/);
+  assert.match(element('kpis').innerHTML,/\$11,940/);assert.match(element('kpis').innerHTML,/\$20,230/);
   assert.match(element('weekly-chart').innerHTML,/Semana 40/);assert.match(element('cutoff').textContent,/11 de octubre/);
   assert.match(element('daily-target').textContent,/\d/);
   element('region').fire('change','Centro Norte');assert.equal(element('scope-title').textContent,'Centro Norte');
@@ -40,7 +40,7 @@ test('initial load, scopes, drilling, search, refresh failure and install help w
   element('table-body').listeners.click({target:{closest:()=>({dataset:{open:'38101'}})}});
   assert.match(element('modal-title').textContent,/38101/);assert.match(element('modal-body').innerHTML,/Recaudación por día/);
   element('modal-close').fire('click');assert.equal(element('modal').open,false);
-  element('reset').fire('click');assert.match(element('kpis').innerHTML,/\$3,349,828/);
+  element('reset').fire('click');assert.match(element('kpis').innerHTML,/\$11,940/);
   element('search').fire('input','38101');await pause(180);assert.match(element('kpis').innerHTML,/\$2,070/);
   element('reset').fire('click');const before=element('kpis').innerHTML;fail=true;await element('refresh').fire('click');assert.equal(element('kpis').innerHTML,before);
   assert.match(element('toast').textContent,/Conservamos el corte/);

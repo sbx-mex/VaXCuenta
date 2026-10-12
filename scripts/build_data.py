@@ -168,7 +168,7 @@ def atomic_write(path, content):
 
 def validate_cumulative(root, config, campaign):
     """A replacement must preserve the campaign history and not roll the cut back."""
-    previous_path = root / "site/data/dashboard.json"
+    previous_path = root / "data/dashboard.json"
     if not previous_path.exists():
         return
     previous = json.loads(previous_path.read_text(encoding="utf-8"))
@@ -268,7 +268,7 @@ def build(root=ROOT):
                "notes": warnings, "sourceSummary": {key: audit[key] for key in ("campaignRows", "excludedRows", "excludedCents", "actualStores", "missingDm", "missingCampaignWeeks", "amountsNotMultipleOf10", "noRealRecord", "missingDays")}}
     canonical = json.dumps(payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
     payload["revision"] = hashlib.sha256(canonical.encode()).hexdigest()[:16]
-    atomic_write(root / "site/data/dashboard.json", json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+    atomic_write(root / "data/dashboard.json", json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
     atomic_write(root / "docs/audit.json", json.dumps(audit, ensure_ascii=False, indent=2))
     summary = ["# Auditoría de VaXCuenta", "", f"Información real al **{cutoff.isoformat()}**.", "",
                f"- CSV completo: {len(records):,} filas; ${audit['rawCents']/100:,.2f}.",

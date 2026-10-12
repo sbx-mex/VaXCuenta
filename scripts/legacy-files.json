@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "snapshotCommit": "822d7fd14a55462d0b07175a1a7a320490c9de5e",
+  "sourceRepository": "sbx-mex/VaXCuenta",
+  "directories": [
+    "site",
+    "dist"
+  ],
+  "files": [
+    {
+      "path": "dist/app.mjs",
+      "gitBlobSha": "b8c8bfb5b569f2fc13bb7644630fd509b7ecfb62",
+      "bytes": 22729
+    },
+    {
+      "path": "dist/assets/apple-touch-icon.png",
+      "gitBlobSha": "f14ea0f2d6870914b37c7516ec4c8b966cbe3b07",
+      "bytes": 5654
+    },
+    {
+      "path": "dist/assets/campaign-frame.png",
+      "gitBlobSha": "3a8cd07c00b67bc46d53a6da50e6e05532954600",
+      "bytes": 58398
+    },
+    {
+      "path": "dist/assets/icon-192.png",
+      "gitBlobSha": "50f091b06a905bcf163e45300e458a91f4a8f852",
+      "bytes": 6114
+    },
+    {
+      "path": "dist/assets/icon-512.png",
+      "gitBlobSha": "fd08638749003a862f386293e6ec0acbbc7a4d81",
+      "bytes": 20642
+    },
+    {
+      "path": "dist/assets/icon-maskable-512.png",
+      "gitBlobSha": "b320f0aedda0d0fbeaeea9a27e7b3649373036a7",
+      "bytes": 15991
+    },
+    {
+      "path": "dist/assets/icon.svg",
+      "gitBlobSha": "8aef36d714325abb448e0632fe143b71b455d5cd",
+      "bytes": 761
+    },
+    {
+      "path": "dist/assets/logo.svg",
+      "gitBlobSha": "0d1bb21b5bbbeb38639a4f51e0516adb7a988cbd",
+      "bytes": 264
+    },
+    {
+      "path": "dist/data/dashboard.json",
+      "gitBlobSha": "e968ce60fe2ef6e086a2b0c6327968b3eca6be36",
+      "bytes": 794894
+    },
+    {
+      "path": "dist/export.mjs",
+      "gitBlobSha": "1ce8a6c761f08a84e5848adcc7ec62da21d1e9c6",
+      "bytes": 6814
+    },
+    {
+      "path": "dist/index.html",
+      "gitBlobSha": "11013a3f25ff273c47e2016492d4627b6054b699",
+      "bytes": 7228
+    },
+    {
+      "path": "dist/manifest.webmanifest",
+      "gitBlobSha": "02f9f43c73a7a853e290d9848fc01d25f9cd34e0",
+      "bytes": 626
+    },
+    {
+      "path": "dist/model.mjs",
+      "gitBlobSha": "4ac61540f5af5189411aaeb175f7c46460139fe6",
+      "bytes": 8556
+    },
+    {
+      "path": "dist/pwa.mjs",
+      "gitBlobSha": "b5e4c391e2df1a2f81eb5461481fb6285b1ec71a",
+      "bytes": 2538
+    },
+    {
+      "path": "dist/styles.css",
+      "gitBlobSha": "932a46d154b3c4bb6993fc3911fa21fdca65cd72",
+      "bytes": 24823
+    },
+    {
+      "path": "dist/sw.js",
+      "gitBlobSha": "3ebb5e035c44a353596cc830b220f63ee9da1d1f",
+      "bytes": 2588
+    },
+    {
+      "path": "dist/version.json",
+      "gitBlobSha": "9224f55defa6050271ae1574f5d85e35122b8937",
+      "bytes": 31
+    },
+    {
+      "path": "site/app.mjs",
+      "gitBlobSha": "b8c8bfb5b569f2fc13bb7644630fd509b7ecfb62",
+      "bytes": 22729
+    },
+    {
+      "path": "site/assets/apple-touch-icon.png",
+      "gitBlobSha": "f14ea0f2d6870914b37c7516ec4c8b966cbe3b07",
+      "bytes": 5654
+    },
+    {
+      "path": "site/assets/campaign-frame.png",
+      "gitBlobSha": "3a8cd07c00b67bc46d53a6da50e6e05532954600",
+      "bytes": 58398
+    },
+    {
+      "path": "site/assets/icon-192.png",
+      "gitBlobSha": "50f091b06a905bcf163e45300e458a91f4a8f852",
+      "bytes": 6114
+    },
+    {
+      "path": "site/assets/icon-512.png",
+      "gitBlobSha": "fd08638749003a862f386293e6ec0acbbc7a4d81",
+      "bytes": 20642
+    },
+    {
+      "path": "site/assets/icon-maskable-512.png",
+      "gitBlobSha": "b320f0aedda0d0fbeaeea9a27e7b3649373036a7",
+      "bytes": 15991
+    },
+    {
+      "path": "site/assets/icon.svg",
+      "gitBlobSha": "8aef36d714325abb448e0632fe143b71b455d5cd",
+      "bytes": 761
+    },
+    {
+      "path": "site/assets/logo.svg",
+      "gitBlobSha": "0d1bb21b5bbbeb38639a4f51e0516adb7a988cbd",
+      "bytes": 264
+    },
+    {
+      "path": "site/data/dashboard.json",
+      "gitBlobSha": "e968ce60fe2ef6e086a2b0c6327968b3eca6be36",
+      "bytes": 794894
+    },
+    {
+      "path": "site/export.mjs",
+      "gitBlobSha": "1ce8a6c761f08a84e5848adcc7ec62da21d1e9c6",
+      "bytes": 6814
+    },
+    {
+      "path": "site/index.html",
+      "gitBlobSha": "11013a3f25ff273c47e2016492d4627b6054b699",
+      "bytes": 7228
+    },
+    {
+      "path": "site/manifest.webmanifest",
+      "gitBlobSha": "02f9f43c73a7a853e290d9848fc01d25f9cd34e0",
+      "bytes": 626
+    },
+    {
+      "path": "site/model.mjs",
+      "gitBlobSha": "4ac61540f5af5189411aaeb175f7c46460139fe6",
+      "bytes": 8556
+    },
+    {
+      "path": "site/pwa.mjs",
+      "gitBlobSha": "b5e4c391e2df1a2f81eb5461481fb6285b1ec71a",
+      "bytes": 2538
+    },
+    {
+      "path": "site/styles.css",
+      "gitBlobSha": "932a46d154b3c4bb6993fc3911fa21fdca65cd72",
+      "bytes": 24823
+    },
+    {
+      "path": "site/sw.js",
+      "gitBlobSha": "15499637e987564ac6f8f50bfa7ef3a71974d881",
+      "bytes": 2590
+    },
+    {
+      "path": "dist/.nojekyll",
+      "gitBlobSha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "bytes": 0
+    }
+  ]
+}

@@ -27,6 +27,8 @@ class Assets(HTMLParser):
 
 def verify():
     html = (SITE / "index.html").read_text(encoding="utf-8")
+    if html != (ROOT / "index.html").read_text(encoding="utf-8") or 'id="dashboard"' not in html or './app.mjs' not in html:
+        raise ValueError("La entrada publicada no es el tablero completo de la raíz.")
     assets = Assets()
     assets.feed(html)
     if len(assets.ids) != len(set(assets.ids)):
@@ -63,11 +65,22 @@ def verify():
         if file.is_file() and file.suffix.lower() in (".xlsx", ".csv", ".py", ".zip"):
             raise ValueError(f"El sitio contiene un archivo de origen: {file.name}")
     data = json.loads((SITE / "data/dashboard.json").read_text())
+    if (SITE / "data/dashboard.json").read_bytes() != (ROOT / "data/dashboard.json").read_bytes():
+        raise ValueError("El artefacto usa un corte distinto al de la raíz.")
+    if (SITE / "sw.js").read_bytes() != (ROOT / "sw.js").read_bytes():
+        raise ValueError("La versión PWA no coincide con la raíz.")
+    if (ROOT / "site").exists():
+        raise ValueError("site/ anterior sigue presente; aplica la limpieza antes de publicar.")
     if len(data["targets"]) != len({(r[0],r[1]) for r in data["targets"]}):
         raise ValueError("Metas duplicadas.")
     if len(data["actuals"]) != len({(r[0],r[1]) for r in data["actuals"]}):
         raise ValueError("Real duplicado.")
     audit = json.loads((ROOT / "docs/audit.json").read_text())
+    for key,value in audit["sourceHashes"].items():
+        import hashlib
+        file=ROOT / "config.json" if key == "config.json" else ROOT / "data" / key
+        if hashlib.sha256(file.read_bytes()).hexdigest() != value:
+            raise ValueError(f"El origen cambió sin recalcular: {key}")
     if sum(r[2] for r in data["actuals"]) != audit["campaignCents"]:
         raise ValueError("Real público no concilia con el origen.")
     if data["cutoff"] != max(row[1] for row in data["actuals"]) or data["cutoff"] != audit["cutoff"]:

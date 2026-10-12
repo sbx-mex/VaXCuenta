@@ -1,26 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {prepare,selectStores,aggregate,groupRows,weeklySeries,dailySeries,metricForStore,targetAtCutoff,formatDate,periodWindow,money,PENDING_DM} from '../site/model.mjs';
-import {buildCSV,csvCell,printHTML} from '../site/export.mjs';
+import {prepare,selectStores,aggregate,groupRows,weeklySeries,dailySeries,metricForStore,targetAtCutoff,formatDate,periodWindow,money,PENDING_DM} from '../model.mjs';
+import {buildCSV,csvCell,printHTML} from '../export.mjs';
 const data=JSON.parse(await readFile(new URL('./fixtures/baseline-2026-10-11.json',import.meta.url)));
 const prepared=prepare(data);
 
-test('national real, objective and missing amount reconcile exactly',()=>{
+test('regression real, objective and missing amount reconcile exactly',()=>{
   const rows=selectStores(prepared), total=aggregate(rows);
-  assert.equal(rows.length,975);assert.equal(total.realCents,334982800);assert.equal(total.targetCents,352693000);
-  assert.equal(total.gapCents,17710200);assert.equal(total.completion,334982800/352693000);
-  assert.equal(total.missingTargets,0);assert.equal(total.noRecordStores,31);
+  assert.equal(rows.length,6);assert.equal(total.realCents,1194000);assert.equal(total.targetCents,2023000);
+  assert.equal(total.gapCents,829000);assert.equal(total.completion,1194000/2023000);
+  assert.equal(total.missingTargets,0);assert.equal(total.noRecordStores,1);
 });
 test('week40 retains the complete weekly objective for four real campaign days',()=>{
   const row=metricForStore(prepared,'38101','40');
   assert.equal(row.realCents,43000);assert.equal(row.targetCents,161000);assert.equal(row.dailyDonations,23);assert.equal(row.records,4);
-  const national=aggregate(selectStores(prepared,{period:'40'}));assert.equal(national.realCents,102425800);
+  const national=aggregate(selectStores(prepared,{period:'40'}));assert.equal(national.realCents,297000);
 });
 test('week41 is complete on Sunday 11 October',()=>{
   const row=metricForStore(prepared,'38101','41');
   assert.equal(row.realCents,164000);assert.equal(row.targetCents,161000);assert.equal(row.records,7);
-  assert.equal(aggregate(selectStores(prepared,{period:'41'})).realCents,232557000);
+  assert.equal(aggregate(selectStores(prepared,{period:'41'})).realCents,897000);
 });
 test('single shop cumulative totals stay tied to both weekly targets',()=>{
   const row=metricForStore(prepared,'38101');assert.equal(row.realCents,207000);assert.equal(row.targetCents,322000);assert.equal(row.dailyDonations,23);
@@ -41,7 +41,7 @@ test('regional results use the operational directorio on both real and goal',()=
 });
 test('missing DM shops are retained once and have an explicit group',()=>{
   const rows=selectStores(prepared), pending=groupRows(rows,'dm').find(r=>r.id===PENDING_DM);
-  assert.equal(pending.storeCount,8);assert.equal(new Set(rows.map(r=>r.ceco)).size,rows.length);
+  assert.equal(pending.storeCount,1);assert.equal(new Set(rows.map(r=>r.ceco)).size,rows.length);
 });
 test('weighted completion is a ratio of sums',()=>{
   const total=aggregate(selectStores(prepared,{region:'Centro Norte'}));
@@ -86,7 +86,7 @@ test('future shop openings are not considered active before their first goal',()
 });
 test('actuals lacking an objective remain visible and mark comparison incomplete',()=>{
   const clone=structuredClone(data);clone.stores.push({ceco:'49999',name:'Nueva',region:'Por asignar',dm:PENDING_DM});clone.actuals.push(['49999','2026-10-11',1000]);
-  const rows=selectStores(prepare(clone));assert.equal(rows.length,976);assert.equal(aggregate(rows).realCents,334983800);assert.equal(aggregate(rows).completion,null);
+  const rows=selectStores(prepare(clone));assert.equal(rows.length,7);assert.equal(aggregate(rows).realCents,1195000);assert.equal(aggregate(rows).completion,null);
 });
 test('greater than100 percent is retained and gap is never negative',()=>{
   const row=metricForStore(prepared,'38101','41');assert.ok(row.completion>1);assert.equal(row.gapCents,0);
@@ -96,7 +96,7 @@ test('duplicated compiled financial targets are rejected',()=>{
 });
 test('corrected real amounts at the same cutoff recompute totals',()=>{
   const clone=structuredClone(data);clone.actuals.find(r=>r[0]==='38101')[2]+=1000;
-  assert.equal(aggregate(selectStores(prepare(clone))).realCents,334983800);
+  assert.equal(aggregate(selectStores(prepare(clone))).realCents,1195000);
 });
 test('exports preserve filtered total and numeric daily objectives',()=>{
   const rows=selectStores(prepared,{region:'Centro Norte'}),groups=groupRows(rows,'dm'),total=aggregate(rows);

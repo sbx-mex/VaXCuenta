@@ -1,58 +1,64 @@
 # VaXCuenta · Starbucks México
 
-PWA estática de recaudación para la campaña del **1 de octubre al 30 de noviembre de 2026**. Compara pesos reales con el objetivo proyectado y resume **Región, DM y Tienda**.
+PWA para comparar **recaudación real vs. objetivo** por **Región, DM y Tienda**, en la campaña del **1 de octubre al 30 de noviembre de 2026**.
 
-La pantalla muestra cuatro indicadores: **recaudado**, **objetivo al corte**, **avance** y **faltante**. Incluye filtros dependientes, búsqueda por CeCo o nombre, detalle diario de tienda, tendencia semanal, exportación a CSV y una vista de impresión para guardar como PDF. El objetivo diario se muestra como número de donativos.
+La entrada pública es **index.html en raíz**, con verde Starbucks, naranja sutil, logotipo, filtros, detalle diario de tienda, comparación semanal, objetivo diario numérico, exportación y soporte sin conexión.
 
-**Empieza por [LEEME_PRIMERO.md](LEEME_PRIMERO.md)** para publicar y actualizar.
+**Publicar y ver: [LEEME_PRIMERO.md](LEEME_PRIMERO.md).**
 
-## Datos
+## Una sola fuente
 
-| Archivo | Uso |
+| Archivo o carpeta | Uso |
 | --- | --- |
-| `data/Va X Cuenta.csv` | Recaudación original por CeCo y día, expresada en MXN. |
-| `data/VaxCuenta Objetivos 26.xlsx` | Metas originales por CeCo y SEM_ALSEA. |
-| `data/Directorio.xlsx` | Región y DM de Esfuerzo Operativo. |
-| `config.json` | Fechas de campaña, semana ancla y reglas del objetivo. |
-| `site/data/dashboard.json` | Datos preparados para la consulta. Se genera automáticamente. |
+| `index.html`, `app.mjs`, `model.mjs`, `styles.css` | App y cálculos editables en raíz. |
+| `assets/` | Logotipo de campaña e iconos PWA. |
+| `data/Va X Cuenta.csv` | Recaudación original por CeCo y día. |
+| `data/VaxCuenta Objetivos 26.xlsx` | Metas originales por CeCo y semana. |
+| `data/Directorio.xlsx` | Región y DM del directorio operativo. |
+| `data/dashboard.json` | Corte preparado por el importador. |
+| `scripts/sw.template.js` | Plantilla del Service Worker. El build genera `sw.js` con versión. |
+| `scripts/legacy-files.json` | Lista exacta de copias anteriores que puede retirar el workflow. |
+| `dist/` | Artefacto temporal de publicación, ignorado en Git y fuera del ZIP correctivo. |
 
-El importador usa Python sin paquetes externos. Conserva los archivos fuente, rechaza claves financieras duplicadas y prepara el resultado con escritura atómica. El corte proviene del máximo día real dentro de la campaña. Los reemplazos deben conservar el acumulado.
+La carpeta anterior `site/` y el `dist/` que estaba guardado en el repositorio se retiran después de validar sus huellas y el reemplazo correcto en raíz. El fixture de regresión se redujo de 794,894 a 6,650 bytes; conserva los casos necesarios para las pruebas. La carga pública mantiene todos sus registros y sus importes.
 
-Región y DM se toman del directorio operativo. Si una tienda no está en él, se conserva la región del Excel y se identifica su DM como pendiente. Ambas métricas se asignan a la misma tienda y región; ninguna fila real se pierde por falta de responsable.
+## Workflow
 
-## Publicación
+**VaXCuenta - Validar, limpiar y publicar** valida las fuentes y pruebas, aplica la limpieza verificada, guarda las eliminaciones y los archivos generados, construye un artefacto con lista explícita de recursos públicos y lo publica en GitHub Pages. CSV, Excel, scripts y auditorías quedan fuera del artefacto de publicación.
 
-La carpeta `.github/workflows` contiene la validación y el despliegue a GitHub Pages. El artefacto publicado es exclusivamente `dist/`; los Excel, CSV originales, motores, pruebas y auditorías permanecen fuera de ese artefacto.
+El job de limpieza usa `contents: write` sólo para guardar los cambios validados. No necesita PAT ni un secreto adicional. El push es normal, sin `--force`: una actualización posterior en `main` no se sobrescribe. En pull requests se ejecutan los controles sin publicar ni guardar cambios en el remoto.
 
-Las rutas del sitio, el manifiesto y el Service Worker son relativas. Funciona en el subdirectorio del repositorio sin cambiar un base path. No depende de CDN, fuentes externas ni un servidor de aplicación. El Service Worker usa una caché propia por ruta y solicita primero el corte más reciente; sin conexión informa que está mostrando el último descargado.
+La raíz también contiene la app completa para evitar que la configuración de publicación por rama sirva el README. El modo recomendado para un único flujo de publicación es **GitHub Actions**.
 
-Un despliegue convencional de GitHub Pages abre las cifras sin inicio de sesión. Región, DM y Tienda son filtros de consulta, no permisos. La visibilidad del repositorio y la del sitio se configuran por separado en GitHub.
+## Actualizar
 
-## Verificación y desarrollo
+Reemplaza el CSV acumulado desde el 1 de octubre; conserva sus encabezados y su nombre. El corte proviene del último día real dentro de la campaña. Las cargas que retroceden el corte o pierden el inicio del acumulado se rechazan. Se mantienen los importes no múltiplos de $10 y se distinguen sin registro, cero y meta pendiente.
 
-Requiere Python 3.10+ y Node 20+. No requiere `npm install` ni `pip install`.
+Las metas y la región/DM se unen por CeCo. La semana 40 conserva el objetivo semanal completo. En semanas posteriores en curso la meta monetaria se prorratea por días calendario hasta el corte. El dato diario del Excel se muestra como número independiente.
+
+## Validar localmente
+
+Python 3.10+ y Node 20+. Sin `pip install` ni `npm install`.
 
 ```sh
 python3 scripts/build_data.py
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 npm test
+python3 scripts/cleanup_legacy.py
+python3 scripts/cleanup_legacy.py --apply
 npm run build
 python3 scripts/verify_release.py
 python3 -m http.server 8000 --directory dist
 ```
 
-`site/` contiene la aplicación editable. `dist/` es el sitio preparado para publicar. Modifica `site/` y vuelve a ejecutar el build; las modificaciones directas en `dist/` se sobrescriben.
-
-Las pruebas de regresión usan un conjunto fijo del corte inicial en `tests/fixtures/`, para que un nuevo corte no rompa pruebas por importes históricos fijados. Las pruebas de integración contrastan además la carga vigente con su auditoría.
-
-## Identidad visual
-
-Verde Starbucks `#006241`, naranja cálido y fondos claros. El logotipo Va por mi cuenta se muestra desde el marco original del PowerPoint adjunto, conservado en `site/assets/campaign-frame.png`. El icono de la app es SVG con sus variantes PNG para instalación. El diseño se adapta a móvil con tarjetas por resultado y no requiere desplazamiento horizontal de la tabla.
+La limpieza se ejecuta **antes del build**. Si ya existe un `dist/` recién generado, no se considera una copia anterior por nombre; sus huellas son distintas y el limpiador no lo elimina.
 
 ## Documentación
 
 - [Metodología](docs/METODOLOGIA.md)
-- [Auditoría de fuentes](docs/AUDITORIA.md)
-- [Validación del proyecto](docs/VALIDACION.md)
-- [Publicación oficial con GitHub Actions](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
-- [Instalación de PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable)
+- [Auditoría de datos](docs/AUDITORIA.md)
+- [Obsoletos identificados](docs/OBSOLETOS.md)
+- [Validación y límites](docs/VALIDACION.md)
+- [GitHub Pages con workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
+
+Un despliegue convencional de GitHub Pages permite consultar las cifras sin inicio de sesión. Región, DM y Tienda son filtros de consulta. La primera visita guarda el corte para consulta sin conexión, siempre con su fecha visible.
