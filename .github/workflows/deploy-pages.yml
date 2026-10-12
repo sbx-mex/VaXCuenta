@@ -1,4 +1,4 @@
-name: Validar y publicar VaXCuenta
+name: VaXCuenta - Validar, limpiar y publicar
 on:
   push:
     branches: [main, master]
@@ -10,34 +10,46 @@ concurrency:
   group: vaxcuenta-pages-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  validate:
+  validate-clean-build:
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Abrir proyecto
+      - name: Abrir archivos correctos
         uses: actions/checkout@v6
-      - name: Usar Node 24
+      - name: Preparar Node 24
         uses: actions/setup-node@v7
         with:
           node-version: '24'
           package-manager-cache: false
-      - name: Validar y preparar datos
+      - name: Validar datos y último corte real
         run: python3 scripts/build_data.py
-      - name: Auditar importación
+      - name: Validar importación y limpieza protegida
         run: python3 -m unittest discover -s tests -p 'test_*.py' -v
-      - name: Probar aplicación
+      - name: Comprobar obsoletos antes de retirar archivos
+        run: python3 scripts/cleanup_legacy.py
+      - name: Validar cálculos, filtros, exportación y PWA
         run: npm test
-      - name: Preparar sitio estático
+      - name: Eliminar copias obsoletas verificadas
+        run: python3 scripts/cleanup_legacy.py --apply
+      - name: Preparar sólo las eliminaciones autorizadas
+        run: python3 scripts/commit_validated.py --stage-obsolete
+      - name: Preparar app en raíz y sitio de publicación
         run: npm run build
-      - name: Verificar archivos de publicación
+      - name: Verificar que se publica el tablero
         run: python3 scripts/verify_release.py
-      - name: Guardar sitio para publicación
+      - name: Guardar limpieza y corte validado
+        if: github.event_name != 'pull_request'
+        run: python3 scripts/commit_validated.py --push
+      - name: Preparar publicación del tablero
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v4
         with:
           path: dist
-  deploy:
+  publish:
     if: github.event_name != 'pull_request'
-    needs: validate
+    needs: validate-clean-build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -47,8 +59,12 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Configurar Pages
+      - name: Configurar GitHub Pages
         uses: actions/configure-pages@v5
       - name: Publicar VaXCuenta
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Mostrar enlace del tablero
+        env:
+          VAXCUENTA_PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: printf '### VaXCuenta publicada\n\n%s\n' "$VAXCUENTA_PAGE_URL" >> "$GITHUB_STEP_SUMMARY"
