@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#006241">
+  <meta name="description" content="VaXCuenta Starbucks México. Recaudación real y objetivos por Región, DM y Tienda. Campaña del 1 de octubre al 30 de noviembre de 2026.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="VaXCuenta">
+  <title>VaXCuenta · Starbucks México</title>
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#dashboard">Ir a la información</a>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="VaXCuenta, inicio"><img src="./assets/icon.svg" width="40" height="40" alt=""><span>Va<span class="brand-x">X</span>Cuenta<small>STARBUCKS MÉXICO</small></span></a>
+    <div class="header-actions"><span id="connection" class="connection"><span></span>En línea</span><button id="install" class="button quiet" type="button">Instalar app</button><button id="help" class="icon-button" type="button" aria-label="Cómo leer el tablero">?</button></div>
+  </header>
+  <main id="dashboard" class="shell">
+    <section class="hero" aria-labelledby="main-title">
+      <div class="hero-copy"><div class="eyebrow">RECAUDACIÓN · CAMPAÑA 2026</div><h1 id="main-title">Así va <span>VaXCuenta.</span></h1><p>Del 1 de octubre al 30 de noviembre</p><div class="hero-tags"><span>Donativo de <b>$10</b></span><span>Objetivo basado en <b>7% de tickets proyectados</b></span></div></div>
+      <div class="hero-brand"><svg viewBox="797 870 263 176" role="img" aria-label="Va por mi cuenta. Nadie más con hambre."><image href="./assets/campaign-frame.png" width="1080" height="1080"/></svg><div class="cutoff"><span class="cutoff-dot"></span><div><small>INFORMACIÓN REAL AL</small><strong id="cutoff">Cargando…</strong></div></div></div>
+    </section>
+    <section class="filter-panel" aria-label="Filtros de consulta">
+      <div class="panel-label"><h2>Tu alcance</h2><button id="reset" type="button" class="text-button">Limpiar filtros</button></div>
+      <div class="filter-grid">
+        <label>Región<select id="region"><option value="">Todas las regiones</option></select></label>
+        <label>DM<select id="dm"><option value="">Todos los DM</option></select></label>
+        <label>Tienda<select id="store"><option value="">Todas las tiendas</option></select></label>
+        <label>Periodo<select id="period"><option value="all">Acumulado al corte</option></select></label>
+      </div>
+    </section>
+    <div id="load-state" class="load-state" role="status">Validando la información de la campaña…</div>
+    <section id="report" hidden aria-label="Real contra objetivo">
+      <div class="scope-line"><div><h2 id="scope-title">Resumen nacional</h2><p id="scope-meta"></p></div><div class="report-actions"><button id="refresh" type="button" class="button quiet"><span aria-hidden="true">↻</span> Actualizar</button><button id="export" type="button" class="button solid">Exportar <span aria-hidden="true">↓</span></button></div></div>
+      <div class="kpi-grid" id="kpis" aria-live="polite"></div>
+      <div id="period-note" class="period-note"></div>
+      <div class="insights-grid">
+        <section class="panel weekly-panel"><div class="panel-heading"><div><h2>Real vs. objetivo</h2><p id="chart-subtitle">Recaudación por semana</p></div><div class="legend"><span><i class="real-dot"></i>Real</span><span><i class="target-dot"></i>Objetivo al corte</span></div></div><div id="weekly-chart"></div></section>
+        <aside class="panel daily-panel"><div class="eyebrow">OBJETIVO DIARIO</div><h2>De $10 en $10.</h2><strong id="daily-target" class="daily-number">—</strong><p>donativos proyectados por día</p><span id="daily-week" class="pill warm"></span><p class="daily-footnote">Referencia numérica del Excel. El avance se mide en pesos.</p><div class="daily-rule"><span>Real registrado</span><strong id="records-info"></strong></div></aside>
+      </div>
+      <section class="panel ranking" aria-labelledby="ranking-title">
+        <div class="ranking-heading"><div><h2 id="ranking-title">Resultados por región</h2><p id="ranking-meta"></p></div><div class="view-tabs" role="group" aria-label="Agrupar resultados"><button type="button" data-view="region" aria-pressed="true">Región</button><button type="button" data-view="dm" aria-pressed="false">DM</button><button type="button" data-view="store" aria-pressed="false">Tienda</button></div></div>
+        <div class="table-toolbar"><label class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span class="sr-only">Buscar tienda, CeCo, región o DM</span><input id="search" type="search" placeholder="Buscar tienda, CeCo o DM" autocomplete="off"></label><label class="sort-field"><span>Ordenar</span><select id="sort"><option value="completion">Mayor avance</option><option value="lowest">Menor avance</option><option value="real">Mayor recaudación</option><option value="name">Nombre A–Z</option></select></label></div>
+        <div id="empty-state" class="empty-state" hidden>No hay tiendas para estos filtros. Ajusta el alcance o limpia la búsqueda.</div>
+        <div class="table-wrap"><table id="results"><caption class="sr-only">Real, objetivo al corte, avance y objetivo diario del alcance seleccionado</caption><thead><tr><th id="name-heading" scope="col">Región</th><th scope="col">Recaudado</th><th scope="col">Objetivo al corte</th><th scope="col">Avance</th><th scope="col">Faltante</th><th scope="col">Donativos / día</th><th scope="col"><span class="sr-only">Abrir detalle</span></th></tr></thead><tbody id="table-body"></tbody><tfoot id="table-total"></tfoot></table></div>
+        <div class="table-note"><span id="table-count"></span><span>El avance se calcula con la suma de pesos, sin promediar porcentajes.</span></div>
+      </section>
+      <details class="source-notes"><summary>Sobre los datos y las metas <span id="source-note-count"></span></summary><div id="source-notes-content"></div></details>
+      <details class="calendar-panel"><summary>Calendario de campaña y objetivos disponibles</summary><div id="campaign-calendar"></div></details>
+    </section>
+    <footer class="footer"><span>VaXCuenta <b>·</b> Starbucks México</span><span id="footer-cutoff"></span><button type="button" id="copy-link" class="text-button">Copiar enlace de esta consulta</button></footer>
+  </main>
+  <dialog id="modal"><div class="modal-top"><h2 id="modal-title"></h2><button type="button" class="icon-button" id="modal-close" aria-label="Cerrar">×</button></div><div id="modal-body"></div></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <noscript><div class="load-state">Activa JavaScript para consultar VaXCuenta.</div></noscript>
+</body>
+</html>

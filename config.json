@@ -1,0 +1,9 @@
+{
+  "campaign": {"name": "VaXCuenta", "start": "2026-10-01", "end": "2026-11-30", "donationPesos": 10},
+  "calendar": {"anchorMonday": "2026-09-28", "anchorWeek": 40},
+  "realDateFormat": "MDY",
+  "firstWeekFullTarget": true,
+  "currentWeekTarget": "calendar-prorated",
+  "directorySource": "sbx-mex/Esfuerzo_Operativo · data/Directorio.xlsx",
+  "directoryBlobSha": "016a92992def31e7b5a45c1b82eaf355948a1909"
+}

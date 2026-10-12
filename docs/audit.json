@@ -1,0 +1,180 @@
+{
+  "status": "verified-with-source-notes",
+  "cutoff": "2026-10-11",
+  "rawRows": 9490,
+  "campaignRows": 9372,
+  "excludedRows": 118,
+  "rawCents": 335394800,
+  "campaignCents": 334982800,
+  "excludedCents": 412000,
+  "objectiveRows": 8781,
+  "targetStores": 977,
+  "actualStores": 944,
+  "directoryDuplicateKeysCollapsed": [
+    "43194",
+    "43195",
+    "43198",
+    "43204",
+    "43205",
+    "43209",
+    "43215",
+    "43219",
+    "43220",
+    "43223",
+    "43240",
+    "43252",
+    "43256"
+  ],
+  "directoryConflicts": [],
+  "missingDm": [
+    "43065",
+    "43196",
+    "43199",
+    "43206",
+    "43214",
+    "43221",
+    "43248",
+    "43251",
+    "43260",
+    "43261"
+  ],
+  "regionChanges": [
+    {
+      "ceco": "43045",
+      "targetRegion": "Centro Poniente",
+      "directoryRegion": "Centro Centro"
+    },
+    {
+      "ceco": "43159",
+      "targetRegion": "Centro Poniente",
+      "directoryRegion": "Centro Sur"
+    },
+    {
+      "ceco": "43164",
+      "targetRegion": "Centro Poniente",
+      "directoryRegion": "Centro Sur"
+    },
+    {
+      "ceco": "43183",
+      "targetRegion": "Centro Poniente",
+      "directoryRegion": "Centro Sur"
+    },
+    {
+      "ceco": "43188",
+      "targetRegion": "Centro Poniente",
+      "directoryRegion": "Centro Centro"
+    },
+    {
+      "ceco": "43194",
+      "targetRegion": "Centro Poniente",
+      "directoryRegion": "Centro Norte"
+    },
+    {
+      "ceco": "43256",
+      "targetRegion": "Centro Poniente",
+      "directoryRegion": "Bajío"
+    }
+  ],
+  "missingCampaignWeeks": [
+    49
+  ],
+  "excludedTargets": [
+    {
+      "sourceRow": 8783,
+      "ceco": "pendiente",
+      "name": "Miguel Aleman MTY",
+      "week": 44,
+      "targetPesos": 1700
+    },
+    {
+      "sourceRow": 8784,
+      "ceco": "pendiente",
+      "name": "Miguel Aleman MTY",
+      "week": 45,
+      "targetPesos": 1700
+    },
+    {
+      "sourceRow": 8785,
+      "ceco": "pendiente",
+      "name": "Miguel Aleman MTY",
+      "week": 46,
+      "targetPesos": 1700
+    },
+    {
+      "sourceRow": 8786,
+      "ceco": "pendiente",
+      "name": "Miguel Aleman MTY",
+      "week": 47,
+      "targetPesos": 1700
+    },
+    {
+      "sourceRow": 8787,
+      "ceco": "pendiente",
+      "name": "Miguel Aleman MTY",
+      "week": 48,
+      "targetPesos": 1700
+    }
+  ],
+  "amountsNotMultipleOf10": 14,
+  "noRealRecord": [
+    "38168",
+    "38180",
+    "38203",
+    "38231",
+    "38232",
+    "38310",
+    "38325",
+    "38342",
+    "38357",
+    "38383",
+    "38403",
+    "38409",
+    "38420",
+    "38443",
+    "38509",
+    "38518",
+    "38539",
+    "38578",
+    "38641",
+    "38652",
+    "38662",
+    "38766",
+    "38767",
+    "38789",
+    "38933",
+    "38940",
+    "43016",
+    "43029",
+    "43122",
+    "43156",
+    "43206"
+  ],
+  "missingDays": [],
+  "realWithoutTarget": [],
+  "dailyRecordCounts": {
+    "2026-10-01": 713,
+    "2026-10-02": 795,
+    "2026-10-03": 785,
+    "2026-10-04": 779,
+    "2026-10-05": 902,
+    "2026-10-06": 911,
+    "2026-10-07": 918,
+    "2026-10-08": 922,
+    "2026-10-09": 914,
+    "2026-10-10": 883,
+    "2026-10-11": 850
+  },
+  "sourceHashes": {
+    "Va X Cuenta.csv": "aea40461fdc6a0dbb6b57c483f1956e5affa1ff8506b7e2a4d4a4f5ca616951d",
+    "VaxCuenta Objetivos 26.xlsx": "c0f1eed2b94844a8a9677072cf90148ae43915a402aecb28c4c210cd84e85564",
+    "Directorio.xlsx": "58ad9cf30ff57a86d2103aaf8ed3a5fd926c01e59500c88e0a759f189781566a",
+    "config.json": "24d9ee127da61ba349586f95c3bbd79288002c2f78ebb61575f1d1346bf59079"
+  },
+  "warnings": [
+    "10 tiendas sin DM confirmado; sus importes se conservan en Región y Tienda y en el grupo DM pendiente de asignación.",
+    "Falta el objetivo de la semana 49 (30 de noviembre). No se extrapola ni se presenta una meta total de campaña completa.",
+    "5 metas de Miguel Aleman MTY tienen CeCo pendiente; se conservan en la auditoría sin atribuirles recaudación.",
+    "14 importes no son múltiplos de $10; se preservan. Recaudado / $10 expresa donativos equivalentes, no tickets comprobados.",
+    "7 tiendas tienen regiones distintas entre Excel y directorio. Región y DM se toman del directorio operativo."
+  ]
+}
