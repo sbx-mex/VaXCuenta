@@ -16,7 +16,9 @@ class CleanupTests(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory()
         self.root=Path(self.temp.name)/"project"
-        shutil.copytree(ROOT,self.root,ignore=shutil.ignore_patterns("dist","__pycache__",".git","node_modules"))
+        # Cada prueba crea sus propias copias antiguas. No heredar site/ ni dist/
+        # del checkout, que siguen presentes hasta ejecutar la limpieza real.
+        shutil.copytree(ROOT,self.root,ignore=shutil.ignore_patterns("site","dist","__pycache__",".git","node_modules"))
         self.rows=[]
         for name in ("site/index.html","dist/index.html"):
             file=self.root/name;file.parent.mkdir(parents=True,exist_ok=True);file.write_text("old copy\n")

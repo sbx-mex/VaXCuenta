@@ -1,37 +1,32 @@
-# VaXCuenta corregido: cargar y ver
+# VaXCuenta: corrección de Python para cargar
 
-Este ZIP corrige el problema de ver el README en el enlace del sitio. La app completa queda en **index.html, en la raíz**. Incluye el workflow **VaXCuenta - Validar, limpiar y publicar**.
+**VaXCuenta_Fix_Python.zip** corrige los cuatro errores de Python de la ejecución `38317971674`. Se probaron los archivos del repositorio actual: **66 pruebas aprobadas** y limpieza de **33 copias antiguas**. La segunda ejecución también pasó.
 
-## Dos pasos
+## Cargar la corrección
 
-1. Descomprime el ZIP. Sube **todo el contenido de la carpeta VaXCuenta** a la raíz de **sbx-mex/VaXCuenta**, reemplazando los archivos existentes. Incluye `.github/workflows/deploy-pages.yml`. No subas el ZIP como archivo ni subas la carpeta VaXCuenta dentro del repositorio. Los tres archivos originales CSV/Excel no están en este ZIP correctivo: el flujo conserva los que ya cargaste en `data/`.
-2. En **Actions**, abre **VaXCuenta - Validar, limpiar y publicar** y ejecuta **Run workflow → main**. Al terminar en verde abre **https://sbx-mex.github.io/VaXCuenta/**. Usa **Ctrl + F5** si conservas la página anterior.
+1. Descomprime el ZIP y sube **el contenido de la carpeta VaXCuenta** a la raíz de **sbx-mex/VaXCuenta**. Reemplaza los seis archivos indicados abajo. Incluye `.github/workflows/deploy-pages.yml` y `.gitignore`. Guarda todos los cambios en un mismo commit en **main**. No subas el ZIP ni una carpeta adicional VaXCuenta dentro del repositorio.
+2. En **Settings → Pages → Build and deployment → Source**, selecciona **GitHub Actions**. Es la configuración para publicar el artefacto validado del workflow.
+3. En **Actions → VaXCuenta - Validar, limpiar y publicar**, abre la ejecución del nuevo commit. También puedes iniciarla con **Run workflow → main**. Comprueba que **validate-clean-build** y **publish** terminen en verde. Abre **https://sbx-mex.github.io/VaXCuenta/** y usa **Ctrl + F5** para actualizar.
 
-La app ya está en raíz y funciona con la configuración `main / (root)` que muestras. Para que sólo publique el flujo validado, selecciona **Settings → Pages → Source → GitHub Actions**.
+Repetir la ejecución del commit anterior no incorpora esta corrección. Primero carga los archivos y después ejecuta el workflow del nuevo commit.
 
-## Ver antes de subir
+## Los seis archivos para reemplazar o agregar
 
-El ZIP contiene **VaXCuenta_Vista_Previa.html**, fuera de la carpeta que se carga a GitHub. Ábrelo con doble clic en Chrome o Edge: muestra la app con el corte real del **11 de octubre** sin instalar nada. Es una vista local fija para revisión; no se carga al repositorio. La instalación PWA y las actualizaciones se usan en el sitio publicado.
+| Archivo | Función |
+| --- | --- |
+| `.github/workflows/deploy-pages.yml` | Prepara Python 3.12, valida, limpia y publica. |
+| `.gitignore` | Evita volver a guardar el dist/ generado. |
+| `tests/test_cleanup.py` | Aísla las pruebas de las carpetas antiguas del checkout. |
+| `LEEME_PRIMERO.md` | Instrucciones de esta corrección. |
+| `docs/VALIDACION.md` | Resultado de la auditoría y alcance comprobado. |
+| `docs/CORRECCION_PYTHON.md` | Causa del fallo y comportamiento del workflow. |
 
-## Qué hace el workflow
+Python valida el CSV, los Excel, la recaudación, las metas y la limpieza protegida. Node valida la app y prepara la publicación. Los tres archivos de datos, las metas y el directorio se conservan. El workflow crea un commit con la limpieza y el corte validado; no necesitas eliminar site/ ni dist/ a mano.
 
-- Valida los CSV, metas, CeCo, fechas y totales.
-- Ejecuta **66 pruebas** de datos, app, PWA y limpieza.
-- Revisa las huellas de las copias anteriores de **site/** y **dist/**.
-- Elimina **33 archivos antiguos identificados**, después de validar la app de raíz. Si encuentra otra versión o archivos desconocidos, se detiene antes de borrar.
-- Guarda la limpieza y el corte mediante un commit automático, sin sobrescribir commits posteriores.
-- Genera un `dist/` nuevo sólo durante la ejecución y publica exclusivamente el tablero.
+## Información real confirmada
 
-**No borres a mano `data/`, `tests/`, `scripts/` ni los Excel.** Las eliminaciones autorizadas están listadas en **docs/OBSOLETOS.md**. El flujo guarda su resultado en **docs/LIMPIEZA_OBSOLETOS.json**.
-
-## Datos confirmados
-
-| Corte | Recaudado | Objetivo | Avance | Faltante |
+| Corte | Real | Objetivo | Avance | Faltante |
 | --- | ---: | ---: | ---: | ---: |
 | 11 de octubre de 2026 | $3,349,828 | $3,526,930 | 95.0% | $177,102 |
 
-La semana 40 conserva la meta semanal completa. Los $4,120 previos al 1 de octubre no entran al avance. Siguen señaladas la meta faltante del 30 de noviembre y las asignaciones pendientes de DM.
-
-## Actualizar después
-
-Reemplaza **data/Va X Cuenta.csv** con el acumulado desde el **1 de octubre hasta el último dato real**. Mantén los nombres originales del Excel de metas y del directorio. El workflow recalcula y publica; no añadas otra carpeta `site/` ni vuelvas a subir `dist/`.
+La semana 40 mantiene su objetivo semanal completo. La validación y el commit se comprobaron localmente con los mismos archivos; el estado verde de GitHub depende de la ejecución del nuevo commit después de cargar este ZIP.
