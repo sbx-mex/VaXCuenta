@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "snapshotCommit": "822d7fd14a55462d0b07175a1a7a320490c9de5e",
+  "obsoleteDirectories": [
+    "site",
+    "dist"
+  ],
+  "removedFiles": [
+    "dist/app.mjs",
+    "dist/assets/apple-touch-icon.png",
+    "dist/assets/campaign-frame.png",
+    "dist/assets/icon-192.png",
+    "dist/assets/icon-512.png",
+    "dist/assets/icon-maskable-512.png",
+    "dist/assets/icon.svg",
+    "dist/assets/logo.svg",
+    "dist/data/dashboard.json",
+    "dist/export.mjs",
+    "dist/index.html",
+    "dist/manifest.webmanifest",
+    "dist/model.mjs",
+    "dist/pwa.mjs",
+    "dist/styles.css",
+    "dist/sw.js",
+    "dist/version.json",
+    "site/app.mjs",
+    "site/assets/apple-touch-icon.png",
+    "site/assets/campaign-frame.png",
+    "site/assets/icon-192.png",
+    "site/assets/icon-512.png",
+    "site/assets/icon-maskable-512.png",
+    "site/assets/icon.svg",
+    "site/assets/logo.svg",
+    "site/data/dashboard.json",
+    "site/export.mjs",
+    "site/index.html",
+    "site/manifest.webmanifest",
+    "site/model.mjs",
+    "site/pwa.mjs",
+    "site/styles.css",
+    "site/sw.js"
+  ],
+  "protectedSourcesSha256": {
+    "data/Va X Cuenta.csv": "aea40461fdc6a0dbb6b57c483f1956e5affa1ff8506b7e2a4d4a4f5ca616951d",
+    "data/VaxCuenta Objetivos 26.xlsx": "c0f1eed2b94844a8a9677072cf90148ae43915a402aecb28c4c210cd84e85564",
+    "data/Directorio.xlsx": "58ad9cf30ff57a86d2103aaf8ed3a5fd926c01e59500c88e0a759f189781566a",
+    "config.json": "24d9ee127da61ba349586f95c3bbd79288002c2f78ebb61575f1d1346bf59079"
+  },
+  "canonicalEntry": "index.html",
+  "remainingLegacyFiles": 0
+}
