@@ -37,12 +37,14 @@ export function buildReport(rows,total,data,state,context,storeRows){
   if(noRecord.length)warnings.push(`Sin registro: ${noRecord.slice(0,3).map(row=>`${row.ceco} · ${row.name}`).join('; ')}${noRecord.length>3?`; y ${noRecord.length-3} más`:''}. Se conservan sus metas.`);
   if(incomplete.length)warnings.push(`${incomplete.length} tienda(s) con meta incompleta: avance y faltante se muestran sin calcular.`);
   if(stores.some(row=>row.dm===PENDING_DM))warnings.push('Hay tiendas con DM pendiente de asignación; sus importes se conservan.');
-  const regionReferences=state.region&&!state.dm&&!state.store&&!state.query?data.stores.filter(row=>row.directoryRegion===state.region&&row.region!==state.region):[];
-  if(regionReferences.length)warnings.push(`Referencia regional: ${regionReferences.slice(0,2).map(row=>`${row.ceco} · ${row.name} pertenece a ${row.region} según sus metas`).join('; ')}. No se suma a ${state.region}.`);
+  const regionReferences=stores.filter(row=>row.directoryRegion && row.targetRegion && row.directoryRegion!==row.targetRegion);
+  if(regionReferences.length)warnings.push(`${regionReferences.length} tienda(s) con cambio de región respecto a metas. Se aplica el directorio a real y objetivo: ${regionReferences.slice(0,3).map(row=>`${row.ceco}: ${row.targetRegion} a ${row.region}`).join('; ')}${regionReferences.length>3?'; detalle en Excel':''}.`);
+  const unassigned=stores.filter(row=>row.assignmentSource==='Pendiente en Directorio.xlsx');
+  if(unassigned.length)warnings.push(`${unassigned.length} tienda(s) faltan en el directorio; sus importes se conservan en Por asignar.`);
   return {stores,actuals,targets,total:calculated,window,period,title,dates,summaryView,summaryRows,interpretation,coverage,rules,warnings,
     scopeLine:stores.length===1?`${stores[0].region} · ${stores[0].dm}`:'',
     summaryLabel:`Resultados por ${summaryView==='region'?'Región':summaryView==='dm'?'DM':'Tienda'}`,
     search:state.query||'',scopeLatest:actuals.reduce((latest,row)=>row[1]>latest?row[1]:latest,''),
     dailyNote:`Donativos/día es un número del Excel; el donativo es de ${money(data.config.campaign.donationPesos*100)}. El real ya está en pesos.`,
-    sourceNote:'Región del Excel de metas · DM del directorio · Unión por CeCo.'};
+    sourceNote:'Nombre, región y DM de Directorio.xlsx. Importes de metas y real unidos por CeCo.'};
 }

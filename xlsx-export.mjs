@@ -86,15 +86,15 @@ export function buildXLSX(rows,total,data,state,context,storeRows){
   for(const note of [report.coverage,...report.rules,...report.warnings,report.dailyNote,report.sourceNote,'Para validar: abre Validación; después, Tiendas, Real diario y Metas.']){
     summary.rows.push([note]);const line=summary.rows.length;summary.merges.push(`A${line}:F${line}`);summary.heights[line]=note.length>130?42:30;
   }
-  const tableHead=['CeCo','Tienda','Región de metas','DM','Tiendas','Real MXN','Objetivo MXN','Avance','Faltante MXN','Donativos / día (número)','Filas reales','Estado'];
+  const tableHead=['CeCo','Tienda','Región vigente','DM','Tiendas','Real MXN','Objetivo MXN','Avance','Faltante MXN','Donativos / día (número)','Filas reales','Estado','Región original metas','Asignación','Estatus directorio'];
   const storeCells=(row,line)=>[row.ceco,row.name,row.region,row.dm,numeric(1),
     formula(`SUMIF(${rawRange('A')},A${line},${rawRange('D')})`,row.realCents/100,3),
     formula(`SUMIF(${targetRange('A')},A${line},${targetRange('G')})`,row.targetCents/100,3),
     row.completion==null?numeric(null,4):formula(`IF(G${line}>0,F${line}/G${line},0)`,row.completion,4),
     row.missingTargets?numeric(null,3):formula(`MAX(G${line}-F${line},0)`,row.gapCents/100,3),numeric(row.dailyDonations,5),
     formula(`COUNTIF(${rawRange('A')},A${line})`,row.records),
-    row.missingTargets?'Meta incompleta':formula(`IF(K${line}=0,"Sin registro","Con registro")`,row.records?'Con registro':'Sin registro')];
-  const detail={name:'Tiendas',widths:[10,35,22,36,10,18,18,14,18,20,13,19],header:5,dataEnd:last,merges:['A1:L1','A2:L2','A3:L3','A4:L4'],heights:{4:35},rows:[
+    row.missingTargets?'Meta incompleta':formula(`IF(K${line}=0,"Sin registro","Con registro")`,row.records?'Con registro':'Sin registro'),row.targetRegion||'Sin meta',row.assignmentSource||'Por confirmar',row.directoryStatus||'Por confirmar'];
+  const detail={name:'Tiendas',widths:[10,35,22,36,10,18,18,14,18,20,13,19,24,33,24],header:5,dataEnd:last,merges:['A1:O1','A2:O2','A3:O3','A4:O4'],heights:{4:35},rows:[
     [title('VaXCuenta · Tiendas')],[report.title+' · '+metadata],[cutoff],
     ['Real y objetivo se calculan con las hojas Real diario y Metas. Sin registro conserva su objetivo.'],tableHead.map(head),...stores.map((row,i)=>storeCells(row,i+6)),
     [{value:'TOTAL',style:6},null,null,null,formula(`SUM(${storeRange('E')})`,total.storeCount),formula(realFormula,total.realCents/100,8),formula(goalFormula,total.targetCents/100,8),total.completion==null?numeric(null,4):formula(`IF(G${last+1}>0,F${last+1}/G${last+1},0)`,total.completion,4),total.missingTargets?numeric(null,8):formula(`MAX(G${last+1}-F${last+1},0)`,total.gapCents/100,8),numeric(total.dailyDonations,5),formula(`SUM(${storeRange('K')})`,total.records)]
@@ -103,11 +103,11 @@ export function buildXLSX(rows,total,data,state,context,storeRows){
     [title('VaXCuenta · Real diario')],['Fuente: Va X Cuenta.csv'],[metadata],['Importes originales en pesos. No se multiplican por el donativo de $10.'],['CeCo','Fecha','Tienda','Real MXN'].map(head),
     ...report.actuals.map(row=>[row[0],numeric(Date.parse(`${row[1]}T00:00:00Z`)/86400000+25569,7),lookup.get(row[0]).name,numeric(row[2]/100,3)])
   ]};
-  const targets={name:'Metas',widths:[11,35,22,11,22,17,24,22,22],header:5,dataEnd:5+report.targets.length,merges:['A1:I1','A2:I2','A3:I3','A4:I4'],heights:{4:35},rows:[
-    [title('VaXCuenta · Metas del periodo')],['Fuente: VaxCuenta Objetivos 26.xlsx'],[metadata],
+  const targets={name:'Metas',widths:[11,35,22,11,22,17,24,22,22,24],header:5,dataEnd:5+report.targets.length,merges:['A1:J1','A2:J2','A3:J3','A4:J4'],heights:{4:35},rows:[
+    [title('VaXCuenta · Metas del periodo')],['Fuente: VaxCuenta Objetivos 26.xlsx. Región vigente: Directorio.xlsx.'],[metadata],
     ['Meta del periodo = meta semanal × días del objetivo ÷ 7. Semana 40 conserva 7 días de objetivo.'],
-    ['CeCo','Tienda','Región de metas','Semana','Meta semanal MXN','Días del objetivo','Meta del periodo MXN','Donativos / día (número)','Donativos / semana (número)'].map(head),
-    ...report.targets.map((row,i)=>[row.ceco,lookup.get(row.ceco).name,lookup.get(row.ceco).region,numeric(row.week),numeric(row.weeklyCents/100,3),numeric(row.days),formula(`ROUND(E${i+6}*F${i+6}/7,2)`,row.targetCents/100,3),numeric(row.dailyDonations,5),numeric(row.weeklyDonations,5)])
+    ['CeCo','Tienda','Región vigente','Semana','Meta semanal MXN','Días del objetivo','Meta del periodo MXN','Donativos / día (número)','Donativos / semana (número)','Región original metas'].map(head),
+    ...report.targets.map((row,i)=>[row.ceco,lookup.get(row.ceco).name,lookup.get(row.ceco).region,numeric(row.week),numeric(row.weeklyCents/100,3),numeric(row.days),formula(`ROUND(E${i+6}*F${i+6}/7,2)`,row.targetCents/100,3),numeric(row.dailyDonations,5),numeric(row.weeklyDonations,5),lookup.get(row.ceco).targetRegion||'Sin meta'])
   ]};
   const checks=[
     ['Real diario vs. corte original',total.realCents/100,`SUM(${rawRange('D')})`,total.realCents/100,3],

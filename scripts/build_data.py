@@ -87,25 +87,34 @@ def read_real(path, config):
 def read_directory(path):
     rows = read_xlsx(path, "Directorio")
     columns = {normalized(v): i for i, v in enumerate(rows[0])}
-    for name in ("cc", "region", "dm"):
+    for name in ("cc", "ccnombre", "region", "dm"):
         if name not in columns:
             raise ValueError(f"Falta {name} en Directorio.")
     grouped = defaultdict(list)
-    for row in rows[1:]:
+    for index, row in enumerate(rows[1:], 2):
+        row = row + [None] * max(0, len(rows[0]) - len(row))
+        if not any(str(value or "").strip() for value in row):
+            continue
         store = ceco(row[columns["cc"]])
-        if store:
-            grouped[store].append(row)
+        if not store:
+            raise ValueError(f"CeCo inválido en Directorio, fila {index}.")
+        grouped[store].append(row)
     mapping, conflicts, duplicate_keys = {}, [], []
     for store, group in grouped.items():
         regions = {str(r[columns["region"]] or "").strip() for r in group}
         dms = {str(r[columns["dm"]] or "").strip() for r in group}
+        names = {str(r[columns["ccnombre"]] or "").strip() for r in group}
+        statuses = {str(r[columns["estatus"]] or "").strip() for r in group} if "estatus" in columns else set()
         if len(group) > 1:
             duplicate_keys.append(store)
-        if len(regions) != 1 or len(dms) != 1:
+        if len(regions) != 1 or len(dms) != 1 or len(names) != 1:
             conflicts.append(store)
-            mapping[store] = {"region": None, "dm": PENDING_DM}
+            mapping[store] = {"region": None, "dm": PENDING_DM, "name": None}
         else:
-            mapping[store] = {"region": next(iter(regions)) or None, "dm": next(iter(dms)) or PENDING_DM}
+            mapping[store] = {"region": next(iter(regions)) or None, "dm": next(iter(dms)) or PENDING_DM,
+                              "name": next(iter(names)) or None}
+        mapping[store]["status"] = next(iter(statuses)) if len(statuses) == 1 else "Por confirmar"
+        mapping[store]["statusConflict"] = len(statuses) > 1
     return mapping, conflicts, duplicate_keys
 
 
@@ -191,6 +200,8 @@ def build(root=ROOT):
     directory_path = root / "data/Directorio.xlsx"
     records = read_real(real_path, config)
     directory, directory_conflicts, duplicates = read_directory(directory_path)
+    if directory_conflicts:
+        raise ValueError("Asignaciones distintas para el mismo CeCo en Directorio: " + ", ".join(directory_conflicts))
     stores, targets, excluded_targets = read_targets(target_path, config["campaign"]["donationPesos"])
     campaign = [r for r in records if start <= r[1] <= end]
     excluded = [r for r in records if not start <= r[1] <= end]
@@ -203,14 +214,24 @@ def build(root=ROOT):
     for key, _, _ in campaign:
         if key not in stores:
             stores[key] = {"ceco": key, "name": f"Tienda {key}", "targetRegion": "Por asignar", "state": ""}
-    missing_dm, region_changes = [], []
+    missing_dm, region_changes, name_changes, missing_directory, incomplete_directory = [], [], [], [], []
     for key, store in stores.items():
         entry = directory.get(key)
-        # El alcance financiero conserva la región de la misma fuente de metas.
-        # El directorio complementa DM y tiendas con real sin una meta asignada.
+        # Directorio.xlsx manda para la identidad y la estructura operativa.
+        # Metas y real se conservan por CeCo, sin alterar sus importes.
         store["directoryRegion"] = (entry or {}).get("region")
-        store["region"] = store["targetRegion"] if key in target_keys else store["directoryRegion"] or store["targetRegion"]
+        store["region"] = store["directoryRegion"] or "Por asignar"
         store["dm"] = (entry or {}).get("dm") or PENDING_DM
+        store["directoryStatus"] = (entry or {}).get("status") or "Por confirmar"
+        store["assignmentSource"] = "Directorio.xlsx" if entry else "Pendiente en Directorio.xlsx"
+        if not entry:
+            missing_directory.append(key)
+        elif not entry.get("name") or not entry.get("region") or entry.get("dm") == PENDING_DM:
+            incomplete_directory.append(key)
+        if entry and entry.get("name"):
+            if store["name"] != entry["name"]:
+                name_changes.append({"ceco": key, "targetName": store["name"], "directoryName": entry["name"]})
+            store["name"] = entry["name"]
         if store["dm"] == PENDING_DM:
             missing_dm.append(key)
         if key in target_keys and entry and entry["region"] and entry["region"] != store["targetRegion"]:
@@ -242,6 +263,11 @@ def build(root=ROOT):
         warnings.append(f"{len(real_without_target)} tiendas tienen recaudación sin una meta en el Excel; sus pesos se conservan y la comparación del alcance afectado se marca como incompleta.")
     if missing_dm:
         warnings.append(f"{len(missing_dm)} tiendas sin DM confirmado; sus importes se conservan en Región y Tienda y en el grupo DM pendiente de asignación.")
+    if missing_directory:
+        warnings.append(f"{len(missing_directory)} tiendas con meta o real no aparecen en Directorio.xlsx; conservan sus importes en Por asignar hasta confirmar su región y DM.")
+    status_conflicts = sorted(key for key, entry in directory.items() if entry.get("statusConflict"))
+    if status_conflicts:
+        warnings.append(f"{len(status_conflicts)} CeCo tienen estatus distintos en filas del directorio; se muestran como Por confirmar. Esto no excluye ni duplica sus importes.")
     if expected_weeks - available_weeks:
         warnings.append("Falta el objetivo de la semana 49 (30 de noviembre). No se extrapola ni se presenta una meta total de campaña completa.")
     if excluded_targets:
@@ -249,7 +275,7 @@ def build(root=ROOT):
     if non_ten:
         warnings.append(f"{len(non_ten)} importes no son múltiplos de $10; se preservan. Recaudado / $10 expresa donativos equivalentes, no tickets comprobados.")
     if region_changes:
-        warnings.append(f"{len(region_changes)} tiendas tienen regiones distintas entre metas y directorio. VaXCuenta conserva la región del Excel de metas y utiliza el directorio para el DM; así los objetivos regionales concilian con el archivo original.")
+        warnings.append(f"{len(region_changes)} tiendas cambiaron de región respecto al Excel de metas. Región, DM y nombre siguen Directorio.xlsx; el real y las metas se agrupan juntos por CeCo y conservan sus totales nacionales.")
     audit = {
         "status": "verified-with-source-notes", "cutoff": cutoff.isoformat(),
         "rawRows": len(records), "campaignRows": len(campaign), "excludedRows": len(excluded),
@@ -258,6 +284,10 @@ def build(root=ROOT):
         "objectiveRows": len(targets), "targetStores": len(stores), "actualStores": len({r[0] for r in campaign}),
         "directoryDuplicateKeysCollapsed": duplicates, "directoryConflicts": directory_conflicts,
         "missingDm": missing_dm, "regionChanges": region_changes,
+        "assignmentSource": "data/Directorio.xlsx", "directoryStores": len(directory),
+        "missingDirectory": sorted(missing_directory), "incompleteDirectory": sorted(incomplete_directory),
+        "directoryStatusConflicts": status_conflicts, "nameChanges": name_changes,
+        "objectiveCents": sum(row[2] for row in targets),
         "missingCampaignWeeks": sorted(expected_weeks - available_weeks),
         "excludedTargets": excluded_targets, "amountsNotMultipleOf10": len(non_ten),
         "noRealRecord": missing_real, "missingDays": missing_days, "realWithoutTarget": real_without_target, "dailyRecordCounts": dict(sorted(day_counts.items())),
@@ -268,7 +298,7 @@ def build(root=ROOT):
     payload = {"schemaVersion": 1, "config": config, "cutoff": cutoff.isoformat(),
                "calendar": weeks, "stores": sorted(stores.values(), key=lambda x: x["ceco"]),
                "targets": sorted(targets), "actuals": real_rows,
-               "notes": warnings, "sourceSummary": {key: audit[key] for key in ("campaignRows", "excludedRows", "excludedCents", "actualStores", "missingDm", "missingCampaignWeeks", "amountsNotMultipleOf10", "noRealRecord", "missingDays")}}
+               "notes": warnings, "sourceSummary": {key: audit[key] for key in ("campaignRows", "excludedRows", "excludedCents", "actualStores", "missingDm", "missingCampaignWeeks", "amountsNotMultipleOf10", "noRealRecord", "missingDays", "missingDirectory", "regionChanges", "nameChanges", "directoryStatusConflicts", "directoryDuplicateKeysCollapsed", "assignmentSource")}}
     canonical = json.dumps(payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
     payload["revision"] = hashlib.sha256(canonical.encode()).hexdigest()[:16]
     atomic_write(root / "data/dashboard.json", json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
@@ -286,9 +316,8 @@ def build(root=ROOT):
                "", "## Notas del origen", ""] + ["- " + warning for warning in warnings]
     summary += ["", "## Tiendas con DM pendiente", "", ", ".join(missing_dm), "", "## Procedencia", "",
                 "Recaudación y metas: archivos adjuntos originales, conservados en data/.",
-                "Región financiera: VaxCuenta Objetivos 26.xlsx, vinculada por CeCo.",
-                "DM y región de referencia: https://github.com/sbx-mex/Esfuerzo_Operativo/blob/main/data/Directorio.xlsx",
-                f"Blob GitHub del directorio: {config['directoryBlobSha']}.",
+                "Nombre, región y DM vigentes: data/Directorio.xlsx del propio repositorio.",
+                "Objetivos: VaxCuenta Objetivos 26.xlsx, vinculados por CeCo y semana; los importes se conservan.",
                 "Los hashes SHA-256 y el detalle de incidencias están en audit.json.", ""]
     atomic_write(root / "docs/AUDITORIA.md", "\n".join(summary))
     print(f"VaXCuenta: corte {cutoff}; {len(campaign):,} registros; ${audit['campaignCents']/100:,.2f}; revisión {payload['revision']}.")

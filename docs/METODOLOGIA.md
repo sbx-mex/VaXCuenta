@@ -36,7 +36,7 @@ La meta de una semana parcial se redondea al centavo por tienda antes de agregar
 
 ## Agregación
 
-Se une por **CeCo**, nunca por nombre. Cada objetivo debe tener una clave única **CeCo + semana** y cada real **CeCo + fecha**. El importador rechaza duplicados financieros y conserva el último sitio válido durante una carga fallida. Las filas repetidas del directorio se consolidan sólo cuando coinciden Región y DM, sin multiplicar importes. Si esas asignaciones entran en conflicto, se marca la asignación como pendiente.
+Se une por **CeCo**, nunca por nombre. Cada objetivo debe tener una clave única **CeCo + semana** y cada real **CeCo + fecha**. El importador rechaza duplicados financieros y conserva el último sitio válido durante una carga fallida. Las filas repetidas del directorio se consolidan sólo cuando coinciden nombre, Región y DM, sin multiplicar importes. Una asignación contradictoria detiene la actualización.
 
 Las tiendas con metas que comienzan después del corte no entran todavía al alcance de ese periodo. Una tienda activa que no tiene fila de recaudación conserva su objetivo y se identifica como **sin registro**. Eso no asegura que su recaudación real sea cero; sólo indica que el archivo no la reporta.
 
@@ -56,11 +56,11 @@ Una tienda con recaudación y meta ausente mantiene sus pesos visibles. El alcan
 
 ## Asignaciones y diferencias del origen
 
-La región financiera se toma del Excel de objetivos de VaXCuenta. Se aplica a las metas y al real de la misma tienda para que los objetivos regionales coincidan con el archivo. El directorio operativo del proyecto Esfuerzo Operativo aporta el DM; su región se conserva en `directoryRegion` como referencia de auditoría. El nombre y el estado provienen del Excel de objetivos.
+El nombre, la región y el DM se toman de **data/Directorio.xlsx de VaXCuenta**, vinculado por CeCo. El Excel de objetivos aporta metas monetarias y proyecciones diarias; su región original se conserva en `targetRegion` para contrastarla con la vigente. Tanto el real como el objetivo usan la región vigente. Un cambio de directorio reasigna ambos juntos y conserva los totales nacionales.
 
-Si falta una tienda en el directorio, mantiene la región de sus metas y su DM se muestra como **DM pendiente de asignación**. Una tienda con real y sin metas usa la región del directorio como complemento, conserva su recaudación y se marca con meta incompleta. Si también falta región, se identifica como **Por asignar**.
+Si una tienda falta en el directorio, su región es **Por asignar** y su DM **DM pendiente de asignación**. El nombre del Excel de objetivos funciona como referencia mientras se incorpora al directorio; sus importes no se excluyen. Una asignación contradictoria de nombre, región o DM para el mismo CeCo rechaza la carga antes de escribir el corte. Las filas repetidas coincidentes se consolidan. Un estatus de apertura contradictorio se marca **Por confirmar**, sin excluir ni multiplicar los importes.
 
-Ejemplo auditado: Centro Norte, semana 40, contiene **71 CeCo y $130,820 de objetivo**. El directorio clasifica Atana Lindavista (43194) en Centro Norte, pero sus metas la asignan a Centro Poniente. Usar la región del directorio agregaba una tienda y $1,660 al objetivo de Centro Norte. La asignación financiera original se conserva y se documenta la diferencia.
+Con los archivos actuales, Centro Norte en semana 40 tiene **72 CeCo y $132,480 de objetivo**. Atana Lindavista (43194) está en Centro Norte. La suma de objetivos se verifica por CeCo frente al Excel; la distribución regional sigue el directorio. El origen no incluye metas ni real para todos los CeCo del directorio: el tablero muestra tiendas con meta activa o recaudación en el periodo.
 
 La tienda Miguel Aleman MTY no tiene un CeCo válido en el Excel: no se le atribuye la recaudación de otra tienda. Sus metas se conservan como pendientes en la auditoría.
 
@@ -76,7 +76,7 @@ La hoja Validación observa esas fuentes y cálculos: compara el real y las meta
 
 Importes, porcentajes, fechas y donativos diarios se exportan como valores tipados. La proyección diaria se conserva como número independiente. Las fuentes de cada hoja se identifican por su nombre original. Los nombres se escriben como texto, evitando fórmulas ejecutables introducidas por una cadena.
 
-Semana 40 y acumulado son vistas distintas. En Centro Norte, la semana 40 suma **$58,420 reales / $130,820 de meta = 44.7%**, con **$72,400 de faltante**. El acumulado del 1 al 11 de octubre suma **$188,190 / $255,640 = 73.6%**, con **$67,450 de faltante**. Jinetes (38661) no tiene registro en semana 40 y conserva su objetivo de $1,510.
+Semana 40 y acumulado son vistas distintas. En Centro Norte, la semana 40 suma **$58,420 reales / $132,480 de meta = 44.1%**, con **$74,060 de faltante**. El acumulado del 1 al 11 de octubre suma **$188,780 / $258,960 = 72.9%**, con **$70,180 de faltante**. Jinetes (38661) no tiene registro en semana 40 y conserva su objetivo de $1,510.
 
 ## Uso sin conexión
 

@@ -70,7 +70,7 @@ test('Centro Norte PDF starts with a compact DM summary independent of screen gr
   const bytes=await buildPDF(groupRows(stores,'store'),t,current,s,ctx,{storeRows:stores});
   const loaded=await globalThis.PDFLib.PDFDocument.load(bytes);assert.ok(loaded.getPageCount()<=2);assert.match(loaded.getTitle(),/Resumen/);
 });
-test('optional detailed PDF paginates all 71 stores after its executive summary',async()=>{
+test('optional detailed PDF paginates all current directory stores after its executive summary',async()=>{
   const s={view:'region',region:'Centro Norte',period:'40'},stores=selectStores(prepare(current),s),t=aggregate(stores);
   const bytes=await buildPDF(groupRows(stores,'region'),t,current,s,{...context,title:'Centro Norte'},{mode:'detail',storeRows:stores});
   const loaded=await globalThis.PDFLib.PDFDocument.load(bytes);assert.ok(loaded.getPageCount()>1);assert.match(loaded.getTitle(),/Detalle/);

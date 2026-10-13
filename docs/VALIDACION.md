@@ -1,43 +1,44 @@
-# Validación de VaXCuenta: exportación resumida
+# Validación de VaXCuenta con el directorio vigente
 
-Entrega revisada con los archivos de **sbx-mex/VaXCuenta**, commit **5684646c2ae190c687d72e0c5e356405bb75e632**. El origen contiene información real al **11 de octubre de 2026**.
+Base revisada: **sbx-mex/VaXCuenta**, commit **98d942032610e80d0a79643b909fde6c80de37c0**. Corte real: **11 de octubre de 2026**.
 
 ## Resultado
 
-**89 pruebas aprobadas: 39 Python y 50 JavaScript.** Se validan la importación, limpieza protegida, reglas monetarias, periodos, filtros, exportaciones y PWA. El artefacto contiene **24 archivos públicos**, incluyendo los generadores y las fuentes embebidas del PDF.
+**103 pruebas aprobadas: 45 Python y 58 JavaScript.** Se verifican importación, CeCo, duplicados, asignaciones, importes, periodos, filtros, exportaciones, limpieza protegida y PWA. El sitio preparado contiene **26 archivos públicos**. Los archivos Excel y CSV originales no se modifican.
 
-| Comprobación | Resultado |
+| Control | Resultado |
 | --- | --- |
-| Centro Norte, semana 40 | 71 CeCo; real $58,420, objetivo $130,820, avance 44.7%, faltante $72,400. |
-| Periodo real semanal | 1–4 octubre: 239 filas de 70 tiendas con registro. |
-| Corte del archivo | 11 de octubre; no se confunde con el final de la semana elegida. |
-| Acumulado regional | 71 tiendas; real $188,190, objetivo $255,640 y avance 73.6%. |
-| Asignación regional | Región del Excel de metas. Atana Lindavista (43194) permanece en Centro Poniente; DM del directorio. |
-| Jinetes (38661) | Sin registro en semana 40; conserva su meta de $1,510. |
-| Real nacional | $3,349,828 de campaña; todas las fechas e importes originales preservados. |
-| Objetivo nacional | $3,526,930 al mismo corte; porcentaje como razón de sumas. |
-| Fuentes | CSV, Excel de metas, directorio y config conservan sus bytes y huellas. |
+| Directorio | 969 CeCo únicos; 13 claves repetidas consolidadas sin duplicar importes. |
+| Asignaciones | Nombre, región y DM provienen del Directorio.xlsx del propio repositorio. |
+| Futuro cambio de directorio | Prueba cambia nombre, región y DM de Angel; metas e importes reales permanecen iguales. |
+| Identidades contradictorias | La carga rechaza el mismo CeCo con distintos nombres, regiones o DM antes de escribir el corte. |
+| Pendientes de directorio | 9 tiendas ausentes; conservan sus importes en Por asignar. |
+| Estatus contradictorio | CeCo 43256, Por confirmar; no excluye ni duplica importes. |
+| Región de metas vs. directorio actual | Sin diferencias en las fuentes actuales; se conserva la región original para futuras comparaciones. |
+| Real nacional de campaña | $3,349,828; 9,372 registros, fechas e importes preservados. |
+| Centro Norte, semana 40 | 72 tiendas; $58,420 real, $132,480 objetivo, 44.1% avance, $74,060 faltante. |
+| Centro Norte, acumulado | 72 tiendas; $188,780 real, $258,960 objetivo, 72.9% avance. |
 
-## Excel producido por la app
+## Exportaciones
 
-Se reabrió el XLSX con lectores independientes. Contiene **Resumen, Validación, Tiendas, Real diario y Metas**. Python verifica cada CeCo, los 71 objetivos semanales, sus proyecciones diarias numéricas y las 239 filas del CSV por CeCo, fecha e importe. Las ocho diferencias son cero y los ocho resultados son OK.
+El XLSX real generado por la aplicación se abre con un lector independiente de Python. Las cinco hojas son **Resumen, Validación, Tiendas, Real diario y Metas**. Se comparan todos los CeCo del alcance, importes reales, metas y proyecciones diarias contra las fuentes originales. Las ocho diferencias son cero y sus resultados OK.
 
-Tiendas calcula el real desde Real diario y el objetivo desde Metas. Se verificó el recálculo en un motor independiente: añadir temporalmente $10 al real actualiza el resumen de $58,420 a $58,430 y marca REVISAR el control contra el corte original; la conciliación del detalle continúa correcta. Añadir $10 a una meta actualiza el objetivo de $130,820 a $130,830 y marca el control de metas. Se restauraron los valores en memoria; el archivo original no se modificó. No se encontraron errores de fórmula. Se renderizaron y revisaron las cinco hojas.
+Tiendas muestra región vigente, región original de metas, fuente de asignación y estatus del directorio. Los importes continúan calculándose desde Real diario y Metas mediante fórmulas por CeCo. Los nuevos campos de asignación no alteran las referencias financieras. Las fórmulas, los valores numéricos y las fechas tipadas se verifican en el archivo exportado; no se realizó una sesión de Microsoft Excel.
 
-Los importes, porcentajes, fechas y cantidades son valores tipados. La proyección diaria se presenta con dos decimales y conserva su precisión numérica. Los nombres se escriben como texto y el resultado REVISAR tiene formato de aviso.
+El resumen PDF regional es una página horizontal con seis DM, indicadores, cobertura y explicación del avance. Se verificó su texto con un lector independiente y se revisó el render de la página: totales legibles, fuentes incluidas y sin elementos cortados. El PDF detallado conserva todas las tiendas y se pagina.
 
-## PDF producido por la app
+## Navegador
 
-El resumen de Centro Norte, semana 40, tiene **una página horizontal** con seis DM, los indicadores, cobertura, explicación del avance y los dos puntos de auditoría. El resumen acumulado regional también ocupa una página. El resumen nacional tiene dos páginas. Se leyeron sus textos y totales de forma independiente.
+Se revisó Chromium en **1440, 390 y 320 px**. Se comprobaron inicio, filtros, semana, detalle de tienda, búsqueda inmediata, navegación Acerca de, carga de ambas fotografías, retorno a la consulta y descargas reales XLSX/PDF. Sin errores de JavaScript ni desbordamiento horizontal en esos tamaños. Se inspeccionaron capturas de escritorio y móvil.
 
-El PDF completo regional añade los 71 CeCo después del resumen, en siete páginas; no omite tiendas para reducir longitud. Se verifican el título, las páginas, el archivo PDF real, el logotipo y las dos fuentes Nimbus Sans embebidas. Se revisaron los renders del resumen y del detalle.
+Acerca de usa las fotografías adjuntas sin alterar sus bytes. Los recursos nuevos se incluyen en el build y el caché offline. La primera instalación no anuncia falsamente una actualización pendiente. La versión nueva se activa al pulsar Usar versión nueva; el cambio de controlador sólo recarga la pestaña que solicitó la actualización. Se cubren esos estados con pruebas específicas y una actualización real de Service Worker en Chromium que conserva Región y Periodo.
 
-## Interfaz, PWA y workflow
+## Refuerzo del motor de cálculo
 
-La prueba de interfaz usa un DOM simulado. Verifica la vista previa, aplicación inmediata de una búsqueda pendiente, descarga XLSX y PDF real, conservación de la semana al cambiar luego los filtros y recuperación de los botones después de generar el PDF. Se comprueba el caché de los módulos y fuentes bajo la ruta del repositorio.
+Antes de mostrar el corte, se comprueban CeCo únicos, claves CeCo+día únicas, fechas reales válidas, importes en centavos enteros, semanas conocidas y conciliación de meta semanal con donativos proyectados. Los registros se ordenan por fecha para determinar el último día correctamente. Si hay real de una semana previa a la primera meta disponible, la comparación acumulada queda incompleta y se suprime su porcentaje.
 
-El workflow mantiene Python 3.12 y Node 24. Se reconstruyó una copia exacta de los 48 archivos actuales de GitHub, se aplicaron sólo las modificaciones y se ejecutaron sus comandos en orden: importación, pruebas, limpieza, preparación de eliminaciones, build, verificación y guardado validado. El push se ensayó únicamente contra un repositorio local. La limpieza protege los originales y conserva el historial; no elimina archivos desconocidos o modificados por su nombre.
+## Publicación
 
-No se ejecutó una revisión en navegador real ni en Microsoft Excel. La comprobación de recálculo se realizó con un motor independiente, y la revisión PDF con lectores y renders. No se modificó el repositorio remoto. La ejecución verde y publicación en GitHub se verifican al cargar esta mejora y ejecutar el nuevo commit.
+El PR aplica los archivos del ZIP validado y refuerza el motor de cálculo y la actualización de la PWA. Se comprueba siguiendo el flujo: datos, pruebas Python, plan de limpieza, pruebas JavaScript, limpieza, preparación de eliminaciones, build y verificación del artefacto.
 
-Las notas de origen permanecen: semana 49 sin meta, CeCo pendiente, DM pendientes e importes no múltiplos de $10. Se conservan sus datos y se identifican las faltas sin completarlas con supuestos.
+GitHub Actions valida los pull requests sin publicar. Al integrar en main, vuelve a validar y publica el artefacto. El corte de la información sigue siendo el del CSV, no la fecha de publicación.

@@ -18,11 +18,12 @@
   <a class="skip" href="#dashboard">Ir a la información</a>
   <header class="topbar">
     <a class="brand" href="./" aria-label="VaXCuenta, inicio"><img src="./assets/icon.svg" width="40" height="40" alt=""><span>Va<span class="brand-x">X</span>Cuenta<small>STARBUCKS MÉXICO</small></span></a>
-    <div class="header-actions"><span id="connection" class="connection"><span></span>En línea</span><button id="install" class="button quiet" type="button">Instalar app</button><button id="help" class="icon-button" type="button" aria-label="Cómo leer el tablero">?</button></div>
+    <nav class="page-nav" aria-label="Navegación principal"><button id="dashboard-nav" type="button" aria-pressed="true">Inicio</button><button id="about-nav" type="button" aria-pressed="false">Acerca de</button></nav><div class="header-actions"><span id="connection" class="connection"><span></span>En línea</span><button id="update-app" class="button solid" type="button" hidden>Usar versión nueva</button><button id="install" class="button quiet" type="button">Instalar app</button><button id="help" class="icon-button" type="button" aria-label="Cómo leer el tablero">?</button></div>
   </header>
   <main id="dashboard" class="shell">
+    <div id="dashboard-page">
     <section class="hero" aria-labelledby="main-title">
-      <div class="hero-copy"><div class="eyebrow">RECAUDACIÓN · CAMPAÑA 2026</div><h1 id="main-title">Así va <span>VaXCuenta.</span></h1><p>Del 1 de octubre al 30 de noviembre</p><div class="hero-tags"><span>Donativo de <b>$10</b></span><span>Objetivo basado en <b>7% de tickets proyectados</b></span></div></div>
+      <div class="hero-copy"><div class="eyebrow">RECAUDACIÓN · CAMPAÑA 2026</div><h1 id="main-title">Cada aportación <span>cuenta.</span></h1><p>Acompañemos a nuestros equipos: del 1 de octubre al 30 de noviembre.</p><div class="hero-tags"><span>Donativo de <b>$10</b></span><span>Objetivo basado en <b>7% de tickets proyectados</b></span></div></div>
       <div class="hero-brand"><svg viewBox="797 870 263 176" role="img" aria-label="Va por mi cuenta. Nadie más con hambre."><image href="./assets/campaign-frame.png" width="1080" height="1080"/></svg><div class="cutoff"><span class="cutoff-dot"></span><div><small>INFORMACIÓN REAL AL</small><strong id="cutoff">Cargando…</strong></div></div></div>
     </section>
     <section class="filter-panel" aria-label="Filtros de consulta">
@@ -37,11 +38,13 @@
     <div id="load-state" class="load-state" role="status">Validando la información de la campaña…</div>
     <section id="report" hidden aria-label="Real contra objetivo">
       <div class="scope-line"><div><h2 id="scope-title">Resumen nacional</h2><p id="scope-meta"></p></div><div class="report-actions"><button id="refresh" type="button" class="button quiet"><span aria-hidden="true">↻</span> Actualizar</button><button id="export" type="button" class="button solid">Exportar <span aria-hidden="true">↓</span></button></div></div>
+      <div class="reading-steps" aria-label="Cómo consultar"><span><b>1</b> Elige tu alcance</span><span><b>2</b> Compara real y proyección</span><span><b>3</b> Exporta y valida</span></div>
       <div class="kpi-grid" id="kpis" aria-live="polite"></div>
+      <div class="comparison-reading"><p id="comparison-reading" aria-live="polite"></p><button id="review-source" type="button" class="text-button">Validar asignaciones</button></div>
       <div id="period-note" class="period-note"></div>
       <div class="insights-grid">
-        <section class="panel weekly-panel"><div class="panel-heading"><div><h2>Real vs. objetivo</h2><p id="chart-subtitle">Recaudación por semana</p></div><div class="legend"><span><i class="real-dot"></i>Real</span><span><i class="target-dot"></i>Objetivo al corte</span></div></div><div id="weekly-chart"></div></section>
-        <aside class="panel daily-panel"><div class="eyebrow">OBJETIVO DIARIO</div><h2>De $10 en $10.</h2><strong id="daily-target" class="daily-number">—</strong><p>donativos proyectados por día</p><span id="daily-week" class="pill warm"></span><p class="daily-footnote">Referencia numérica del Excel. El avance se mide en pesos.</p><div class="daily-rule"><span>Real registrado</span><strong id="records-info"></strong></div></aside>
+        <section class="panel weekly-panel"><div class="panel-heading"><div><h2>Real vs. objetivo proyectado</h2><p id="chart-subtitle">Recaudación por semana</p></div><div class="legend"><span><i class="real-dot"></i>Real</span><span><i class="target-dot"></i>Objetivo al corte</span></div></div><div id="weekly-chart"></div></section>
+        <aside class="panel daily-panel"><div class="eyebrow">OBJETIVO DIARIO</div><h2>De $10 en $10.</h2><strong id="daily-target" class="daily-number">—</strong><p>donativos proyectados por día</p><span id="daily-week" class="pill warm"></span><p class="daily-footnote">Proyección diaria del Excel. Consulta el avance en pesos frente al objetivo del periodo.</p><div class="daily-rule"><span>Real registrado</span><strong id="records-info"></strong></div></aside>
       </div>
       <section class="panel ranking" aria-labelledby="ranking-title">
         <div class="ranking-heading"><div><h2 id="ranking-title">Resultados por región</h2><p id="ranking-meta"></p></div><div class="view-tabs" role="group" aria-label="Agrupar resultados"><button type="button" data-view="region" aria-pressed="true">Región</button><button type="button" data-view="dm" aria-pressed="false">DM</button><button type="button" data-view="store" aria-pressed="false">Tienda</button></div></div>
@@ -50,8 +53,20 @@
         <div class="table-wrap"><table id="results"><caption class="sr-only">Real, objetivo al corte, avance y objetivo diario del alcance seleccionado</caption><thead><tr><th id="name-heading" scope="col">Región</th><th scope="col">Recaudado</th><th scope="col">Objetivo al corte</th><th scope="col">Avance</th><th scope="col">Faltante</th><th scope="col">Donativos / día</th><th scope="col"><span class="sr-only">Abrir detalle</span></th></tr></thead><tbody id="table-body"></tbody><tfoot id="table-total"></tfoot></table></div>
         <div class="table-note"><span id="table-count"></span><span>El avance se calcula con la suma de pesos, sin promediar porcentajes.</span></div>
       </section>
-      <details class="source-notes"><summary>Sobre los datos y las metas <span id="source-note-count"></span></summary><div id="source-notes-content"></div></details>
+      <details id="source-validation" class="source-notes"><summary>Validar directorio, datos y metas <span id="source-note-count"></span></summary><div id="source-notes-content"></div></details>
       <details class="calendar-panel"><summary>Calendario de campaña y objetivos disponibles</summary><div id="campaign-calendar"></div></details>
+    </section>
+    </div>
+    <section id="about-page" class="about-page" hidden aria-labelledby="about-title">
+      <div class="eyebrow">LIDERAZGO Y CONEXIÓN</div>
+      <h1 id="about-title" tabindex="-1">Acerca de VaXCuenta</h1>
+      <p class="about-intro">Un espacio para acompañar a nuestros equipos, reconocer cada aportación y entender juntos cómo vamos.</p>
+      <div class="about-purpose"><h2>Cada aportación nos acerca.</h2><p>VaXCuenta reúne la recaudación real y el objetivo proyectado de la campaña. Elige tu región, DM o tienda; compara el mismo periodo y comparte un reporte claro con tu equipo.</p><p>El directorio vigente guía las asignaciones. Los importes de cada tienda se conservan por CeCo para que puedas seguirlos desde el resumen hasta su origen.</p></div>
+      <div class="team-grid">
+        <article class="team-card"><a href="./assets/enrique-cesar.jpeg" target="_blank" rel="noopener" aria-label="Ampliar foto de Enrique César Flores"><img src="./assets/enrique-cesar.jpeg" width="1079" height="1397" alt="Enrique César Flores" loading="lazy"><span>Selecciona la foto para ampliarla ↗</span></a><p class="eyebrow">DISEÑO Y DESARROLLO</p><h2>Enrique César Flores</h2></article>
+        <article class="team-card"><a href="./assets/jorge-alcantar.jpeg" target="_blank" rel="noopener" aria-label="Ampliar foto de Jorge Alcantar Aguiar"><img src="./assets/jorge-alcantar.jpeg" width="1154" height="1363" alt="Jorge Alcantar Aguiar" loading="lazy"><span>Selecciona la foto para ampliarla ↗</span></a><p class="eyebrow">DISEÑO Y DESARROLLO</p><h2>Jorge Alcantar Aguiar</h2></article>
+      </div>
+      <div class="about-purpose about-thanks"><div class="eyebrow">SIGAMOS CONSTRUYENDO JUNTOS</div><h2>Gracias por hacer que cada aportación cuente.</h2><p>Usa la información para conversar con tu equipo, reconocer los avances y acordar el siguiente paso. Si encuentras una diferencia, revisa el CeCo, la fecha y las fuentes en la exportación.</p><button id="about-return" class="button solid" type="button">Consultar el avance</button></div>
     </section>
     <footer class="footer"><span>VaXCuenta <b>·</b> Starbucks México</span><span id="footer-cutoff"></span><button type="button" id="copy-link" class="text-button">Copiar enlace de esta consulta</button></footer>
   </main>

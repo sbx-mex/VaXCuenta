@@ -16,6 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'scripts'))
 from xlsx_reader import read_xlsx, NS
+from build_data import read_directory
 
 
 class NativeExcelTests(unittest.TestCase):
@@ -34,9 +35,10 @@ class NativeExcelTests(unittest.TestCase):
             f"await writeFile({json.dumps(str(cls.output))},buildXLSX(rows,total,data,state,{{title:'Centro Norte'}},stores));",
         ])
         subprocess.run(['node', '--input-type=module', '-e', code], check=True, capture_output=True, text=True, timeout=30)
+        cls.directory, _, _ = read_directory(ROOT / 'data/Directorio.xlsx')
         cls.goals = {}
         for row in read_xlsx(ROOT / 'data/VaxCuenta Objetivos 26.xlsx')[1:]:
-            if len(row)>7 and row[4]==40 and str(row[2]).strip()=='Centro Norte':
+            if len(row)>7 and row[4]==40 and cls.directory.get(str(int(row[0])) if isinstance(row[0],(int,float)) else str(row[0]),{}).get('region')=='Centro Norte':
                 cls.goals[str(int(row[0]))] = row
         cls.actuals = []
         raw=(ROOT / 'data/Va X Cuenta.csv').read_bytes()
@@ -81,11 +83,18 @@ class NativeExcelTests(unittest.TestCase):
         self.assertAlmostEqual(float(cells['E8']),real/target,places=12)
         self.assertEqual(cells['C9']*100,target-real)
 
-    def test_all_store_ids_match_original_goal_region_without_duplicates(self):
+    def test_all_store_ids_match_current_directory_without_duplicates(self):
         cells=self.cells('Tiendas')
         keys=[str(cells[f'A{i}']) for i in range(6,6+len(self.goals))]
         self.assertEqual(len(keys),len(set(keys)))
         self.assertEqual(set(keys),set(self.goals))
+        for line in range(6,6+len(self.goals)):
+            key=str(cells[f'A{line}']);entry=self.directory[key]
+            self.assertEqual(cells[f'B{line}'],entry['name'])
+            self.assertEqual(cells[f'C{line}'],entry['region'])
+            self.assertEqual(cells[f'D{line}'],entry['dm'])
+            self.assertEqual(cells[f'M{line}'],self.goals[key][2])
+            self.assertEqual(cells[f'N{line}'],'Directorio.xlsx')
         self.assertEqual(sum(cells[f'F{i}'] for i in range(6,6+len(self.goals))),sum(row[2] for row in self.actuals)/Decimal(100))
         self.assertEqual(sum(cells[f'G{i}'] for i in range(6,6+len(self.goals))),sum(Decimal(str(row[7])) for row in self.goals.values()))
 
