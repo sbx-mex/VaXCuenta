@@ -8,9 +8,9 @@ const prepared=prepare(data);
 
 test('regression real, objective and missing amount reconcile exactly',()=>{
   const rows=selectStores(prepared), total=aggregate(rows);
-  assert.equal(rows.length,6);assert.equal(total.realCents,1194000);assert.equal(total.targetCents,2023000);
+  assert.equal(rows.length,7);assert.equal(total.realCents,1194000);assert.equal(total.targetCents,2023000);
   assert.equal(total.gapCents,829000);assert.equal(total.completion,1194000/2023000);
-  assert.equal(total.missingTargets,0);assert.equal(total.noRecordStores,1);
+  assert.equal(total.missingTargets,0);assert.equal(total.noRecordStores,2);
 });
 test('week40 retains the complete weekly objective for four real campaign days',()=>{
   const row=metricForStore(prepared,'38101','40');
@@ -41,7 +41,7 @@ test('regional results follow the directory and retain the original region for a
 });
 test('missing DM shops are retained once and have an explicit group',()=>{
   const rows=selectStores(prepared), pending=groupRows(rows,'dm').find(r=>r.id===PENDING_DM);
-  assert.equal(pending.storeCount,1);assert.equal(new Set(rows.map(r=>r.ceco)).size,rows.length);
+  assert.equal(pending.storeCount,2);assert.equal(new Set(rows.map(r=>r.ceco)).size,rows.length);
 });
 test('weighted completion is a ratio of sums',()=>{
   const total=aggregate(selectStores(prepared,{region:'Centro Poniente'}));
@@ -80,13 +80,13 @@ test('November30 is week49 and missing targets suppress a misleading completion'
   const clone=structuredClone(data);clone.cutoff='2026-11-30';clone.actuals.push(['38101','2026-11-30',10000]);
   const row=metricForStore(prepare(clone),'38101','49');assert.equal(row.realCents,10000);assert.equal(row.targetCents,0);assert.equal(row.missingTargets,1);assert.equal(row.completion,null);
 });
-test('future shop openings are not considered active before their first goal',()=>{
+test('future objectives are included in the whole campaign without an objective before opening',()=>{
   const firsts=new Map();for(const r of data.targets)firsts.set(r[0],Math.min(firsts.get(r[0])??Infinity,r[1]));
-  const later=[...firsts].find(([ceco,week])=>week>41);assert.ok(later);assert.equal(metricForStore(prepared,later[0]).active,false);
+  const later=[...firsts].find(([ceco,week])=>week>41);assert.ok(later);assert.equal(metricForStore(prepared,later[0]).active,true);assert.equal(metricForStore(prepared,later[0]).targetCents,0);assert.ok(metricForStore(prepared,later[0]).campaignTargetCents>0);
 });
-test('actuals lacking an objective remain visible and mark comparison incomplete',()=>{
+test('actuals lacking an objective are excluded from the evaluation',()=>{
   const clone=structuredClone(data);clone.stores.push({ceco:'49999',name:'Nueva',region:'Por asignar',dm:PENDING_DM});clone.actuals.push(['49999','2026-10-11',1000]);
-  const rows=selectStores(prepare(clone));assert.equal(rows.length,7);assert.equal(aggregate(rows).realCents,1195000);assert.equal(aggregate(rows).completion,null);
+  const rows=selectStores(prepare(clone));assert.equal(rows.length,7);assert.equal(aggregate(rows).realCents,1194000);assert.ok(!rows.some(row=>row.ceco==='49999'));assert.equal(aggregate(rows).completion,1194000/2023000);
 });
 test('greater than100 percent is retained and gap is never negative',()=>{
   const row=metricForStore(prepared,'38101','41');assert.ok(row.completion>1);assert.equal(row.gapCents,0);

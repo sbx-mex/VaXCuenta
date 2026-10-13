@@ -6,7 +6,7 @@ export function buildReport(rows,total,data,state,context,storeRows){
   const selected=new Set(stores.map(row=>row.ceco));
   if(selected.size!==stores.length)throw new Error('Hay CeCo repetidos en la consulta.');
   const window=periodWindow(data,state.period),calculated=aggregate(stores);
-  for(const field of ['realCents','targetCents','records','storeCount','missingTargets']){
+  for(const field of ['realCents','targetCents','records','storeCount','missingTargets','campaignRealCents','campaignTargetCents']){
     if(total[field]!==calculated[field])throw new Error('El resumen no coincide con las tiendas de la consulta.');
   }
   const actuals=data.actuals.filter(row=>selected.has(row[0])&&row[1]>=window.from&&row[1]<=window.to);
@@ -41,7 +41,14 @@ export function buildReport(rows,total,data,state,context,storeRows){
   if(regionReferences.length)warnings.push(`${regionReferences.length} tienda(s) con cambio de región respecto a metas. Se aplica el directorio a real y objetivo: ${regionReferences.slice(0,3).map(row=>`${row.ceco}: ${row.targetRegion} a ${row.region}`).join('; ')}${regionReferences.length>3?'; detalle en Excel':''}.`);
   const unassigned=stores.filter(row=>row.assignmentSource==='Pendiente en Directorio.xlsx');
   if(unassigned.length)warnings.push(`${unassigned.length} tienda(s) faltan en el directorio; sus importes se conservan en Por asignar.`);
-  return {stores,actuals,targets,total:calculated,window,period,title,dates,summaryView,summaryRows,interpretation,coverage,rules,warnings,
+  const campaignActuals=data.actuals.filter(row=>selected.has(row[0]));
+  const campaignTargets=data.targets.filter(row=>selected.has(row[0]));
+  if(campaignActuals.reduce((sum,row)=>sum+row[2],0)!==total.campaignRealCents || campaignTargets.reduce((sum,row)=>sum+row[2],0)!==total.campaignTargetCents)throw new Error('La campaña no concilia con los CeCo seleccionados.');
+  if(stores.some(row=>row.campaignTargetCents<=0))throw new Error('Sólo se evalúan CeCo con objetivo positivo.');
+  const campaignNote=total.campaignMissingTargets?'Meta total cargada: hay objetivos por tienda y semana pendientes. Avance calculado contra los importes disponibles; no se extrapolan metas.':'Meta total completa según el calendario de campaña.';
+  const campaignInterpretation=`De ${money(total.campaignTargetCents)} de meta total cargada, llevamos ${money(total.campaignRealCents)} al ${formatDate(data.cutoff,true)} (${percent(total.campaignCompletion)}). Por recaudar: ${money(total.campaignGapCents)}.`;
+  const campaignCoverage=`${total.storeCount} tiendas con objetivo: ${total.storeCount-total.campaignNoRecordStores} con registro y ${total.campaignNoRecordStores} sin registro en campaña.`;
+  return {stores,actuals,targets,campaignActuals,campaignTargets,campaignNote,campaignInterpretation,campaignCoverage,total:calculated,window,period,title,dates,summaryView,summaryRows,interpretation,coverage,rules,warnings,
     scopeLine:stores.length===1?`${stores[0].region} · ${stores[0].dm}`:'',
     summaryLabel:`Resultados por ${summaryView==='region'?'Región':summaryView==='dm'?'DM':'Tienda'}`,
     search:state.query||'',scopeLatest:actuals.reduce((latest,row)=>row[1]>latest?row[1]:latest,''),

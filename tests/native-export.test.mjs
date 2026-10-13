@@ -20,32 +20,32 @@ function unzip(bytes){
   }
   assert.equal(view.getUint32(position,true),0x02014b50);return files;
 }
-test('Excel opens in Resumen, has five auditable sheets and typed financial formulas',()=>{
+test('Excel opens in Campaña, has eight auditable sheets and typed financial formulas',()=>{
   const zip=unzip(buildXLSX(rows,total,data,state,context,rows)),book=zip.get('xl/workbook.xml');
-  for(const name of ['Resumen','Validación','Tiendas','Real diario','Metas'])assert.ok(book.includes(`name="${name}"`));
-  const summary=zip.get('xl/worksheets/sheet1.xml');
+  for(const name of ['Campaña','Resumen','Validación','Tiendas','Real diario','Metas','Real campaña','Metas campaña'])assert.ok(book.includes(`name="${name}"`));
+  const summary=zip.get('xl/worksheets/sheet2.xml');
   assert.match(summary,/<c r="A8" s="10"><f>SUM\(&apos;Tiendas&apos;!F\$6:F\$6\)<\/f><v>430<\/v>/);
   assert.match(summary,/<c r="C8" s="10"><f>SUM\(&apos;Tiendas&apos;!G\$6:G\$6\)<\/f><v>1610<\/v>/);
   assert.match(summary,/<c r="E8" s="11"><f>IF\(C8&gt;0,A8\/C8,0\)<\/f>/);
-  const detail=zip.get('xl/worksheets/sheet3.xml');
+  const detail=zip.get('xl/worksheets/sheet4.xml');
   assert.match(detail,/<c r="J6" s="5"><v>23<\/v>/);assert.match(detail,/<c r="F6" s="3"><f>SUMIF/);assert.match(detail,/<c r="G6" s="3"><f>SUMIF/);
 });
 test('Excel scopes raw dates and preserves the full week 40 target for four campaign days',()=>{
-  const zip=unzip(buildXLSX(rows,total,data,state,context,rows)),raw=zip.get('xl/worksheets/sheet4.xml'),goals=zip.get('xl/worksheets/sheet5.xml');
+  const zip=unzip(buildXLSX(rows,total,data,state,context,rows)),raw=zip.get('xl/worksheets/sheet5.xml'),goals=zip.get('xl/worksheets/sheet6.xml');
   assert.equal((raw.match(/<row /g)||[]).length,9);assert.ok(raw.includes('38101'));assert.ok(!raw.includes('38106'));
   assert.match(raw,/<c r="B6" s="7"><v>\d+<\/v>/);
   assert.match(goals,/<c r="F6" s="9"><v>7<\/v>/);assert.match(goals,/<c r="G6" s="3"><f>ROUND\(E6\*F6\/7,2\)<\/f><v>1610<\/v>/);
 });
 test('Excel validation reconciles original data and detail with explicit OK and differences',()=>{
-  const zip=unzip(buildXLSX(rows,total,data,state,context,rows)),audit=zip.get('xl/worksheets/sheet2.xml');
-  assert.equal((audit.match(/<v>OK<\/v>/g)||[]).length,8);
-  assert.match(audit,/conditionalFormatting sqref="E9:E16"/);
+  const zip=unzip(buildXLSX(rows,total,data,state,context,rows)),audit=zip.get('xl/worksheets/sheet3.xml');
+  assert.equal((audit.match(/<v>OK<\/v>/g)||[]).length,12);
+  assert.match(audit,/conditionalFormatting sqref="E9:E20"/);
   assert.match(audit,/<c r="D9" s="3"><f>ROUND\(C9-B9,2\)<\/f><v>0<\/v>/);
   assert.match(audit,/<c r="E9" s="6" t="str"><f>IF\(D9=0,&quot;OK&quot;,&quot;REVISAR&quot;\)<\/f><v>OK<\/v>/);
 });
 test('text names remain literal and XML-safe without injected formulas',()=>{
   const changed=[{...rows[0],name:'=HYPERLINK("bad") & <script>'}],zip=unzip(buildXLSX(changed,total,data,state,context,changed));
-  const sheet=zip.get('xl/worksheets/sheet3.xml');
+  const sheet=zip.get('xl/worksheets/sheet4.xml');
   assert.ok(sheet.includes('=HYPERLINK(&quot;bad&quot;) &amp; &lt;script&gt;'));assert.match(sheet,/<c r="B6" t="inlineStr">/);assert.ok(!sheet.includes('<f>=HYPERLINK'));
 });
 test('filename distinguishes week from latest source cutoff',()=>{

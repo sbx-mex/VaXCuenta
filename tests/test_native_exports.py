@@ -83,6 +83,30 @@ class NativeExcelTests(unittest.TestCase):
         self.assertAlmostEqual(float(cells['E8']),real/target,places=12)
         self.assertEqual(cells['C9']*100,target-real)
 
+    def test_campaign_summary_matches_all_source_weeks_and_all_real_dates(self):
+        from build_data import read_targets, read_real
+        _, goals, _ = read_targets(ROOT / 'data/VaxCuenta Objetivos 26.xlsx', 10)
+        totals = {}
+        for key, _, amount, *_ in goals:
+            totals[key] = totals.get(key, 0) + amount
+        eligible = {key for key, amount in totals.items() if amount > 0 and self.directory.get(key, {}).get('region') == 'Centro Norte'}
+        config = json.loads((ROOT / 'config.json').read_text())
+        public = json.loads((ROOT / 'data/dashboard.json').read_text())
+        records = [row for row in read_real(ROOT / 'data/Va X Cuenta.csv', config)
+                   if row[0] in eligible and config['campaign']['start'] <= row[1].isoformat() <= public['cutoff']]
+        target = sum(totals[key] for key in eligible)
+        real = sum(row[2] for row in records)
+        cells = self.cells('Campaña')
+        self.assertEqual(cells['A8'] * 100, target)
+        self.assertEqual(cells['C8'] * 100, real)
+        self.assertAlmostEqual(float(cells['E8']), real / target, places=12)
+        self.assertEqual(cells['C9'] * 100, max(0, target - real))
+        full = self.cells('Tiendas')
+        ids = {str(full[f'A{i}']) for i in range(6, 6 + len(eligible))}
+        self.assertEqual(ids, eligible)
+        self.assertEqual(sum(full[f'P{i}'] for i in range(6, 6 + len(eligible))) * 100, target)
+        self.assertEqual(sum(full[f'Q{i}'] for i in range(6, 6 + len(eligible))) * 100, real)
+
     def test_all_store_ids_match_current_directory_without_duplicates(self):
         cells=self.cells('Tiendas')
         keys=[str(cells[f'A{i}']) for i in range(6,6+len(self.goals))]
@@ -119,9 +143,9 @@ class NativeExcelTests(unittest.TestCase):
             self.assertAlmostEqual(float(cells[f'I{i}']),float(original[5]),places=10)
 
     def test_validation_has_eight_zero_differences_and_explicit_results(self):
-        self.assertEqual(self.names,['Resumen','Validación','Tiendas','Real diario','Metas'])
+        self.assertEqual(self.names,['Campaña','Resumen','Validación','Tiendas','Real diario','Metas','Real campaña','Metas campaña'])
         cells=self.cells('Validación')
-        for i in range(9,17):
+        for i in range(9,21):
             self.assertEqual(cells[f'D{i}'],0)
             self.assertEqual(cells[f'E{i}'],'OK')
             self.assertIn('IF(',self.sheets['Validación'].find(f'.//m:c[@r="E{i}"]/m:f',NS).text)

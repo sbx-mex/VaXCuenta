@@ -30,15 +30,15 @@ test('initial load, scopes, drilling, search, refresh failure and install help w
   globalThis.fetch=async url=>{if(fail)throw new Error('offline');return String(url).endsWith('campaign-frame.png')?{ok:true,arrayBuffer:async()=>readFile(new URL('../assets/campaign-frame.png',import.meta.url))}:{ok:true,json:async()=>structuredClone(data),headers:{get:()=>null}};};
   await import('../app.mjs');await pause(20);
   assert.equal(element('report').hidden,false);assert.equal(element('load-state').hidden,true);
-  assert.match(element('kpis').innerHTML,/\$11,940/);assert.match(element('kpis').innerHTML,/\$20,230/);
+  assert.match(element('kpis').innerHTML,/\$11,940/);assert.match(element('kpis').innerHTML,/\$105,120/);
   assert.match(element('weekly-chart').innerHTML,/Semana 40/);assert.match(element('cutoff').textContent,/11 de octubre/);
   assert.match(element('daily-target').textContent,/\d/);
   element('region').fire('change','Centro Poniente');assert.equal(element('scope-title').textContent,'Centro Poniente');
   assert.ok(!element('table-body').innerHTML.includes('Centro Sur'));
   tabs[1].fire('click');assert.equal(element('ranking-title').textContent,'Resultados por DM');
   element('region').fire('change','Centro Centro');element('dm').fire('change','Guadalupe Ibarra Martínez');element('store').fire('change','38101');
-  assert.match(element('kpis').innerHTML,/\$2,070/);assert.match(element('kpis').innerHTML,/\$3,220/);
-  element('period').fire('change','40');assert.match(element('kpis').innerHTML,/\$430/);assert.match(element('kpis').innerHTML,/\$1,610/);
+  assert.match(element('kpis').innerHTML,/\$2,070/);assert.match(element('kpis').innerHTML,/\$17,830/);
+  const campaignBefore=element('kpis').innerHTML;element('period').fire('change','40');assert.equal(element('kpis').innerHTML,campaignBefore);
   tabs[2].fire('click');assert.equal(element('ranking-title').textContent,'Resultados por tienda');
   element('export').fire('click');assert.match(element('modal-body').innerHTML,/Descargar Excel para validar/);assert.match(element('modal-body').innerHTML,/Descargar resumen PDF/);assert.match(element('modal-body').innerHTML,/PDF con todas las tiendas/);
   assert.match(element('modal-body').innerHTML,/\$430/);assert.match(element('modal-body').innerHTML,/\$1,610/);assert.match(element('modal-body').innerHTML,/4 de octubre/);
@@ -60,7 +60,7 @@ test('initial load, scopes, drilling, search, refresh failure and install help w
   element('about-nav').fire('click');assert.equal(element('about-page').hidden,false);assert.equal(element('dashboard-page').hidden,true);
   element('about-return').fire('click');assert.equal(element('dashboard-page').hidden,false);assert.equal(element('about-page').hidden,true);
   element('review-source').fire('click');assert.equal(element('source-validation').open,true);
-  assert.match(element('comparison-reading').textContent,/proyectados al corte/);
+  assert.match(element('comparison-reading').textContent,/tiendas con objetivo/);
   element('help').fire('click');assert.match(element('modal-body').innerHTML,/participación real en tickets/);
   element('install').fire('click');assert.match(element('modal-body').innerHTML,/Safari/);
   element('modal-close').fire('click');

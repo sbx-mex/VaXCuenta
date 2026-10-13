@@ -30,3 +30,11 @@ dialog{border:1px solid var(--line);padding:0;border-radius:18px;width:min(730px
 @media print{.page-nav,.reading-steps,.comparison-reading button{display:none!important}}
 
 @media(max-width:640px){.header-actions{max-width:100%;flex-wrap:wrap}.header-actions #update-app:not([hidden])~#install{display:none}.header-actions #update-app{font-size:12px;padding:9px 11px}}
+
+/* Lectura de campaña: meta completa disponible y acumulado, mismo universo CeCo. */
+.campaign-summary{padding:24px 28px;border-radius:18px;background:#003c2a;color:#fff;margin:0 0 18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(140px,25%);gap:24px;align-items:center}
+.campaign-summary .eyebrow{color:#bbd9c8}.campaign-summary h3{font-size:clamp(20px,2.4vw,28px);margin:8px 0}.campaign-summary p{margin:0;color:#dbebe2;font-size:14px;line-height:1.6}
+.campaign-bar{height:18px;border-radius:20px;background:#476e5a;overflow:hidden}.campaign-bar span{display:block;height:100%;background:#b7de9c;border-radius:20px}
+.campaign-note{background:#fff4dc;border-left:4px solid #b87919;padding:12px 18px;border-radius:10px;font-size:13px;line-height:1.6;margin:0 0 18px;color:#725115}
+.kpi-grid .kpi strong{font-variant-numeric:tabular-nums}.ranking .progress-state{font-size:10px}
+@media(max-width:760px){.campaign-summary{grid-template-columns:1fr;padding:22px;gap:16px}.campaign-summary p{font-size:13px}.campaign-note{font-size:12px}}

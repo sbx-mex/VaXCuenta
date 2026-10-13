@@ -75,7 +75,11 @@ export function metricForStore(prepared, ceco, period = 'all') {
   const firstTarget = entry.targets.size ? Math.min(...entry.targets.keys()) : Infinity;
   const actuals = entry.actuals.filter(r => r[1] >= window.from && r[1] <= window.to);
   const eligibleWeeks = selectedWeeks.filter(w => w.week >= firstTarget || actuals.some(row => row[1] >= w.campaignStart && row[1] <= w.campaignEnd));
-  const active = eligibleWeeks.length > 0 || actuals.length > 0;
+  const campaignTargetCents = [...entry.targets.values()].reduce((sum, row) => sum + row[2], 0);
+  const campaignRealCents = entry.actuals.reduce((sum, row) => sum + row[2], 0);
+  const campaignMissingTargets = data.calendar.filter(w => w.week >= firstTarget && !entry.targets.has(w.week)).length;
+  const campaignRecords = entry.actuals.length;
+  const active = campaignTargetCents > 0;
   let targetCents = 0, fullTargetCents = 0, missingTargets = 0;
   for (const week of eligibleWeeks) {
     const target = entry.targets.get(week.week);
@@ -89,7 +93,9 @@ export function metricForStore(prepared, ceco, period = 'all') {
   const latestTarget = latestWeek && entry.targets.get(latestWeek.week);
   const realCents = actuals.reduce((sum, row) => sum + row[2], 0);
   const completion = targetCents > 0 && !missingTargets ? realCents / targetCents : null;
-  const metric = {...entry.store, active, realCents, targetCents, fullTargetCents, missingTargets,
+  const metric = {...entry.store, active, campaignTargetCents, campaignRealCents, campaignMissingTargets, campaignRecords,
+    campaignCompletion: campaignTargetCents > 0 ? campaignRealCents / campaignTargetCents : null,
+    campaignGapCents: Math.max(0, campaignTargetCents - campaignRealCents), realCents, targetCents, fullTargetCents, missingTargets,
     records: actuals.length, storeCount: 1, stores: [ceco], latestDay: actuals.at(-1)?.[1] ?? null,
     dailyDonations: latestTarget?.[4] ?? null, weeklyDonations: latestTarget?.[3] ?? null,
     completion, gapCents: Math.max(0, targetCents - realCents),
@@ -99,11 +105,11 @@ export function metricForStore(prepared, ceco, period = 'all') {
 }
 
 export function aggregate(rows, name = 'Total') {
-  const result = {name, realCents: 0, targetCents: 0, fullTargetCents: 0, missingTargets: 0,
+  const result = {name, campaignTargetCents: 0, campaignRealCents: 0, campaignMissingTargets: 0, campaignRecords: 0, campaignNoRecordStores: 0, realCents: 0, targetCents: 0, fullTargetCents: 0, missingTargets: 0,
     records: 0, storeCount: rows.length, stores: [], latestDay: null,
     dailyDonations: 0, weeklyDonations: 0, noRecordStores: 0, pendingDmStores: 0};
   for (const row of rows) {
-    for (const field of ['realCents', 'targetCents', 'fullTargetCents', 'missingTargets', 'records']) result[field] += row[field];
+    for (const field of ['realCents', 'targetCents', 'fullTargetCents', 'missingTargets', 'records', 'campaignTargetCents', 'campaignRealCents', 'campaignMissingTargets', 'campaignRecords']) result[field] += row[field] ?? 0;
     result.stores.push(row.ceco);
     if (row.latestDay && (!result.latestDay || row.latestDay > result.latestDay)) result.latestDay = row.latestDay;
     if (row.dailyDonations == null) result.dailyDonations = null;
@@ -111,8 +117,11 @@ export function aggregate(rows, name = 'Total') {
     if (row.weeklyDonations == null) result.weeklyDonations = null;
     else if (result.weeklyDonations != null) result.weeklyDonations += row.weeklyDonations;
     if (!row.records) result.noRecordStores++;
+    if (!row.campaignRecords) result.campaignNoRecordStores++;
     if (row.dm === PENDING_DM) result.pendingDmStores++;
   }
+  result.campaignCompletion = result.campaignTargetCents > 0 ? result.campaignRealCents / result.campaignTargetCents : null;
+  result.campaignGapCents = Math.max(0, result.campaignTargetCents - result.campaignRealCents);
   result.completion = result.targetCents > 0 && !result.missingTargets ? result.realCents / result.targetCents : null;
   result.gapCents = Math.max(0, result.targetCents - result.realCents);
   result.deltaCents = result.realCents - result.targetCents;
@@ -143,8 +152,8 @@ export function groupRows(rows, view = 'region', sort = 'completion') {
 export function sortRows(rows, sort) {
   return [...rows].sort((a, b) => {
     if (sort === 'name') return a.name.localeCompare(b.name, 'es-MX');
-    if (sort === 'real') return b.realCents - a.realCents || a.name.localeCompare(b.name, 'es-MX');
-    const aRate = a.records ? a.completion : null, bRate = b.records ? b.completion : null;
+    if (sort === 'real') return b.campaignRealCents - a.campaignRealCents || a.name.localeCompare(b.name, 'es-MX');
+    const aRate = a.campaignCompletion, bRate = b.campaignCompletion;
     if (aRate == null && bRate != null) return 1;
     if (bRate == null && aRate != null) return -1;
     return (sort === 'lowest' ? 1 : -1) * ((aRate ?? -1) - (bRate ?? -1)) || b.realCents - a.realCents;

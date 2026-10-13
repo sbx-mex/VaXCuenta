@@ -1,8 +1,8 @@
 # VaXCuenta · Starbucks México
 
-PWA para comparar **recaudación real vs. objetivo** por **Región, DM y Tienda**, en la campaña del **1 de octubre al 30 de noviembre de 2026**.
+PWA para comparar **acumulado al corte vs. meta total cargada de campaña** por **Región, DM y Tienda**, en la campaña del **1 de octubre al 30 de noviembre de 2026**.
 
-La entrada pública es **index.html en raíz**, con verde Starbucks, naranja sutil, logotipo, filtros, detalle diario de tienda, comparación semanal, objetivo diario numérico, exportación y soporte sin conexión.
+La entrada pública es **index.html en raíz**, con verde Starbucks, naranja sutil, logotipo, filtros, detalle diario de tienda, comparación semanal, avance de toda la campaña, exportación y soporte sin conexión.
 
 **Publicar y ver: [LEEME_PRIMERO.md](LEEME_PRIMERO.md).**
 
@@ -20,7 +20,7 @@ La entrada pública es **index.html en raíz**, con verde Starbucks, naranja sut
 | `scripts/legacy-files.json` | Lista exacta de copias anteriores que puede retirar el workflow. |
 | `dist/` | Artefacto temporal de publicación, ignorado en Git y fuera del ZIP correctivo. |
 
-La carpeta anterior `site/` y el `dist/` que estaba guardado en el repositorio se retiran después de validar sus huellas y el reemplazo correcto en raíz. El conjunto de regresión es compacto y conserva los casos necesarios para las pruebas. La carga pública mantiene todos sus registros y sus importes.
+La carpeta anterior `site/` y el `dist/` que estaba guardado en el repositorio se retiran después de validar sus huellas y el reemplazo correcto en raíz. El conjunto de regresión es compacto y conserva los casos necesarios para las pruebas. La carga pública conserva sólo los CeCo con objetivo positivo; los importes excluidos se concilian en auditoría.
 
 ## Workflow
 
@@ -30,22 +30,26 @@ El job de limpieza usa `contents: write` sólo para guardar los cambios validado
 
 La raíz también contiene la app completa para evitar que la configuración de publicación por rama sirva el README. El modo recomendado para un único flujo de publicación es **GitHub Actions**.
 
+## Evaluar la campaña
+
+Sólo se consideran CeCo con meta total positiva, incluidos los de metas futuras. Los CeCo sin objetivo o con meta cero se excluyen. Meta total cargada = suma de todos los objetivos del Excel; avance campaña = acumulado completo al corte ÷ meta total cargada. Falta semana 49: se señala la base incompleta sin estimar importes. La fecha de publicación no cambia el corte.
+
 ## Actualizar
 
-Reemplaza el CSV acumulado desde el 1 de octubre; conserva sus encabezados y su nombre. El corte proviene del último día real dentro de la campaña. Las cargas que retroceden el corte o pierden el inicio del acumulado se rechazan. Se mantienen los importes no múltiplos de $10 y se distinguen sin registro, cero y meta pendiente.
+Reemplaza el CSV acumulado desde el 1 de octubre; conserva sus encabezados y su nombre. El corte proviene del último día real de CeCo con objetivo dentro de la campaña. Las cargas que retroceden el corte o pierden el inicio del acumulado se rechazan. Se mantienen los importes no múltiplos de $10 y se distinguen sin registro, cero y meta pendiente.
 
-Las metas y la región/DM se unen por CeCo. La semana 40 conserva el objetivo semanal completo. En semanas posteriores en curso la meta monetaria se prorratea por días calendario hasta el corte. El dato diario del Excel se muestra como número independiente.
+Las metas y la región/DM se unen por CeCo. La semana 40 conserva el objetivo semanal completo. En semanas posteriores en curso la meta monetaria se prorratea por días calendario hasta el corte. El dato diario del Excel se conserva como número independiente en el detalle. La meta total cargada incluye también las semanas futuras; el selector semanal sólo cambia el detalle del periodo.
 
 **Directorio.xlsx del propio repositorio es la fuente vigente de nombre, región y DM.** Metas y real se unen por CeCo y se agrupan juntos con esa asignación. Los importes originales no cambian. Una tienda ausente del directorio conserva sus importes en Por asignar y su DM queda pendiente. Se rechazan asignaciones contradictorias del mismo CeCo antes de escribir el corte.
 
-Centro Norte tiene ahora **72 tiendas** en semana 40: **$58,420 reales / $132,480 de objetivo = 44.1%**. Atana Lindavista (43194) está en Centro Norte. Los nombres y regiones originales de metas se conservan como referencia de auditoría; el reporte Excel muestra ambas regiones. **Acerca de** incluye el propósito de VaXCuenta y los perfiles de Enrique César Flores y Jorge Alcantar Aguiar.
+Centro Norte tiene **73 tiendas con objetivo de campaña**: **$205,870 acumulados / $1,198,560 de meta total cargada = 17.2%**, al 12 de octubre. Atana Lindavista (43194) está en Centro Norte. Los nombres y regiones originales de metas se conservan como referencia de auditoría; el reporte Excel muestra ambas regiones. **Acerca de** incluye el propósito de VaXCuenta y los perfiles de Enrique César Flores y Jorge Alcantar Aguiar.
 
 ## Exportar la consulta
 
 El botón **Exportar** muestra primero una vista previa del alcance, periodo real, corte del archivo y cuatro indicadores. Conserva filtros y búsqueda durante la descarga.
 
 - **Descargar resumen PDF**: resultados por Región o DM, lectura del avance y avisos para revisar. Centro Norte, semana 40, ocupa una página con seis DM, aunque la tabla de pantalla esté en Tiendas.
-- **Descargar Excel para validar**: Resumen, Validación, Tiendas, Real diario y Metas. Conserva todas las filas del alcance, valores numéricos, fechas y fórmulas que vinculan el real y las metas por CeCo. Ocho controles muestran diferencias y OK/REVISAR.
+- **Descargar Excel para validar**: Campaña, Resumen, Validación, Tiendas, Real diario, Metas, Real campaña y Metas campaña. Conserva todas las filas del alcance, valores numéricos, fechas y fórmulas que vinculan el real y las metas por CeCo. Doce controles muestran diferencias y OK/REVISAR.
 - **Descargar PDF con todas las tiendas**: resumen más lista completa de CeCo y sus importes, con páginas numeradas.
 
 `report.mjs` prepara una misma consulta para ambas exportaciones y comprueba que el resumen concilie con las tiendas, el real diario y las metas del periodo antes de descargar. Las filas sin registro conservan su objetivo; las metas incompletas se señalan sin inventar un avance.

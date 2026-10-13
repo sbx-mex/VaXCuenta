@@ -31,6 +31,8 @@ class RegionContractTests(unittest.TestCase):
     def test_each_week_and_region_match_directory_store_set_and_original_objective(self):
         expected = defaultdict(dict); actual = defaultdict(dict)
         for row in self.targets:
+            if row[0] not in self.stores:
+                continue
             region = self.directory.get(row[0], {}).get('region') or 'Por asignar'
             expected[(row[1], region)][row[0]] = row[2]
         for row in self.data['targets']:

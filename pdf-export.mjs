@@ -60,7 +60,7 @@ export async function buildPDF(rows,total,data,state,context,options={}){
   function paragraph(value,size=8.5,color=muted){const height=wrap(value,font,size,available).length*(size+3);ensure(height+4);y+=lines(value,M,y,available,size,false,color)+4;}
   function heading(value){ensure(30);text(value,M,y,10,true,green);y+=18;}
   newPage();
-  const cards=[['Real recaudado MXN',money(total.realCents)],['Objetivo'+(total.missingTargets?' conocido':' del periodo'),money(total.targetCents)],['Avance',percent(total.completion)],['Faltante MXN',total.missingTargets?'Meta incompleta':money(total.gapCents)]];
+  const cards=[['Meta total cargada MXN',money(total.campaignTargetCents)],['Acumulado al corte MXN',money(total.campaignRealCents)],['Avance de campaña',percent(total.campaignCompletion)],['Por recaudar MXN',money(total.campaignGapCents)]];
   const cardW=(available-30)/4;
   cards.forEach(([label,value],i)=>{
     const x=M+i*(cardW+10);
@@ -70,16 +70,18 @@ export async function buildPDF(rows,total,data,state,context,options={}){
     text(value,x+11,y+26,size,true,i===0?white:ink);
   });
   y+=68;
-  paragraph(report.interpretation,10,ink);
-  paragraph(report.coverage,8.5);
-  paragraph(`Archivo actualizado al ${formatDate(data.cutoff,true)}.${report.search?' Búsqueda: '+report.search+'.':''}`,8.5);
+  paragraph(report.campaignInterpretation,10,ink);
+  paragraph(report.campaignNote,8.5,orange);
+  paragraph(report.campaignCoverage,8.5);
+  paragraph(`Detalle del periodo: real ${money(total.realCents)} / objetivo ${money(total.targetCents)} / avance ${percent(total.completion)}.`,8.5);
+  if(report.search)paragraph('Búsqueda: '+report.search,8.5);
   const summaryWidths=[292,48,115,115,65,93],detailWidths=[278,110,115,65,90,70];
   function table(entries,detail=false){
     const widths=detail?detailWidths:summaryWidths;
-    const labels=detail?['Tienda / CeCo','Real MXN','Objetivo MXN','Avance','Faltante MXN','Donativos/día']:[report.summaryView==='region'?'Región':report.summaryView==='dm'?'DM':'Tienda','Tiendas','Real MXN','Objetivo MXN','Avance','Faltante MXN'];
+    const labels=detail?['Tienda / CeCo','Meta total MXN','Acumulado MXN','Avance campaña','Por recaudar','Avance periodo']:[report.summaryView==='region'?'Región':report.summaryView==='dm'?'DM':'Tienda','Tiendas','Meta total MXN','Acumulado MXN','Avance','Por recaudar'];
     function header(){
-      page.drawRectangle({x:M,y:H-y-24,width:available,height:24,color:green});
-      let x=M;labels.forEach((label,i)=>{lines(label,x+7,y+6,widths[i]-14,8,true,white);x+=widths[i];});y+=24;
+      page.drawRectangle({x:M,y:H-y-(detail?34:24),width:available,height:detail?34:24,color:green});
+      let x=M;labels.forEach((label,i)=>{lines(label,x+7,y+6,widths[i]-14,8,true,white);x+=widths[i];});y+=detail?34:24;
     }
     ensure(60);header();
     function row(entry,isTotal=false){
@@ -87,12 +89,12 @@ export async function buildPDF(rows,total,data,state,context,options={}){
       const nameLines=wrap(name,bold,9,widths[0]-14);
       const meta=detail&&!isTotal?`${entry.ceco} · ${entry.region} · ${entry.dm}`:'';
       const metaLines=meta?wrap(meta,font,7.5,widths[0]-14):[];
-      const height=Math.max(24,nameLines.length*12+metaLines.length*10+10);
+      const height=Math.max(detail?24:22,nameLines.length*12+metaLines.length*10+10);
       if(y+height>bottom){newPage();heading(detail?'Detalle por tienda (continuación)':report.summaryLabel+' (continuación)');header();}
       if(isTotal)page.drawRectangle({x:M,y:H-y-height,width:available,height,color:light});
       nameLines.forEach((line,i)=>text(line,M+7,y+5+i*12,9,true));
       metaLines.forEach((line,i)=>text(line,M+7,y+6+nameLines.length*12+i*10,7.5,false,muted));
-      const values=detail?[money(entry.realCents),money(entry.targetCents),percent(entry.completion),entry.missingTargets?'—':money(entry.gapCents),number(entry.dailyDonations)]:[number(entry.storeCount,0),money(entry.realCents),money(entry.targetCents),percent(entry.completion),entry.missingTargets?'—':money(entry.gapCents)];
+      const values=detail?[money(entry.campaignTargetCents),money(entry.campaignRealCents),percent(entry.campaignCompletion),money(entry.campaignGapCents),percent(entry.completion)]:[number(entry.storeCount,0),money(entry.campaignTargetCents),money(entry.campaignRealCents),percent(entry.campaignCompletion),money(entry.campaignGapCents)];
       let x=M+widths[0];
       values.forEach((value,i)=>{const f=isTotal?bold:font,size=Math.min(9,9*(widths[i+1]-14)/f.widthOfTextAtSize(value,9));text(value,x+widths[i+1]-7-f.widthOfTextAtSize(value,size),y+6,size,isTotal);x+=widths[i+1];});
       if(detail&&!isTotal&&!entry.records)text('Sin registro',M+widths[0]+7,y+21,7,false,muted);
@@ -102,10 +104,10 @@ export async function buildPDF(rows,total,data,state,context,options={}){
     entries.forEach(entry=>row(entry));row({...total,name:'TOTAL DEL ALCANCE'},true);y+=9;
   }
   heading(report.summaryLabel);table(report.summaryRows);
-  for(const rule of report.rules)paragraph(rule);
-  if(report.warnings.length){heading('Qué revisar');for(const warning of report.warnings)paragraph(warning,8.5,ink);}
-  paragraph('Avance = suma real ÷ suma objetivo; no es un promedio de porcentajes. Sin registro significa que no existe una fila real del periodo.');
-  paragraph(report.dailyNote);
+  if(options.mode==='detail')for(const rule of report.rules)paragraph(rule);
+  if(options.mode==='detail'&&report.warnings.length){heading('Qué revisar');for(const warning of report.warnings)paragraph(warning,8.5,ink);}
+  if(options.mode==='detail')paragraph('Avance campaña = acumulado al corte ÷ meta total cargada; no es un promedio de porcentajes. Sin registro significa que no existe una fila real del periodo.');
+  if(options.mode==='detail')paragraph(report.dailyNote);
   paragraph(report.sourceNote);
   if(options.mode==='detail'){
     newPage();heading(`Detalle de ${total.storeCount} tiendas`);table(report.stores,true);

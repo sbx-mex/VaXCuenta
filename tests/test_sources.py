@@ -152,7 +152,7 @@ class SourceTests(unittest.TestCase):
                 public, audit = build(root)
             store = next(s for s in public['stores'] if s['ceco'] == '38101')
             self.assertEqual((store['name'], store['region'], store['dm']), ('Angel actualizado', 'Región nueva', 'DM nuevo'))
-            self.assertEqual(public['targets'], sorted(self.targets))
+            self.assertEqual(public['targets'], sorted(row for row in self.targets if row[0] in {s['ceco'] for s in public['stores']}))
             current = json.loads((ROOT / 'data/dashboard.json').read_text())
             self.assertEqual(public['actuals'], current['actuals'])
 

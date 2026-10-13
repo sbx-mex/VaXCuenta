@@ -86,18 +86,18 @@ export function buildXLSX(rows,total,data,state,context,storeRows){
   for(const note of [report.coverage,...report.rules,...report.warnings,report.dailyNote,report.sourceNote,'Para validar: abre Validación; después, Tiendas, Real diario y Metas.']){
     summary.rows.push([note]);const line=summary.rows.length;summary.merges.push(`A${line}:F${line}`);summary.heights[line]=note.length>130?42:30;
   }
-  const tableHead=['CeCo','Tienda','Región vigente','DM','Tiendas','Real MXN','Objetivo MXN','Avance','Faltante MXN','Donativos / día (número)','Filas reales','Estado','Región original metas','Asignación','Estatus directorio'];
+  const tableHead=['CeCo','Tienda','Región vigente','DM','Tiendas','Real MXN','Objetivo MXN','Avance','Faltante MXN','Donativos / día (número)','Filas reales','Estado','Región original metas','Asignación','Estatus directorio','Meta total cargada MXN','Acumulado campaña MXN','Avance campaña','Por recaudar campaña MXN'];
   const storeCells=(row,line)=>[row.ceco,row.name,row.region,row.dm,numeric(1),
     formula(`SUMIF(${rawRange('A')},A${line},${rawRange('D')})`,row.realCents/100,3),
     formula(`SUMIF(${targetRange('A')},A${line},${targetRange('G')})`,row.targetCents/100,3),
     row.completion==null?numeric(null,4):formula(`IF(G${line}>0,F${line}/G${line},0)`,row.completion,4),
     row.missingTargets?numeric(null,3):formula(`MAX(G${line}-F${line},0)`,row.gapCents/100,3),numeric(row.dailyDonations,5),
     formula(`COUNTIF(${rawRange('A')},A${line})`,row.records),
-    row.missingTargets?'Meta incompleta':formula(`IF(K${line}=0,"Sin registro","Con registro")`,row.records?'Con registro':'Sin registro'),row.targetRegion||'Sin meta',row.assignmentSource||'Por confirmar',row.directoryStatus||'Por confirmar'];
-  const detail={name:'Tiendas',widths:[10,35,22,36,10,18,18,14,18,20,13,19,24,33,24],header:5,dataEnd:last,merges:['A1:O1','A2:O2','A3:O3','A4:O4'],heights:{4:35},rows:[
+    row.missingTargets?'Meta incompleta':formula(`IF(K${line}=0,"Sin registro","Con registro")`,row.records?'Con registro':'Sin registro'),row.targetRegion||'Sin meta',row.assignmentSource||'Por confirmar',row.directoryStatus||'Por confirmar',formula(`SUMIF('Metas campaña'!A$6:A$${Math.max(6,5+report.campaignTargets.length)},A${line},'Metas campaña'!E$6:E$${Math.max(6,5+report.campaignTargets.length)})`,row.campaignTargetCents/100,3),formula(`SUMIF('Real campaña'!A$6:A$${Math.max(6,5+report.campaignActuals.length)},A${line},'Real campaña'!D$6:D$${Math.max(6,5+report.campaignActuals.length)})`,row.campaignRealCents/100,3),formula(`IF(P${line}>0,Q${line}/P${line},0)`,row.campaignCompletion,4),formula(`MAX(P${line}-Q${line},0)`,row.campaignGapCents/100,3)];
+  const detail={name:'Tiendas',widths:[10,35,22,36,10,18,18,14,18,20,13,19,24,33,24,22,22,17,22],header:5,dataEnd:last,merges:['A1:S1','A2:S2','A3:S3','A4:S4'],heights:{4:35},rows:[
     [title('VaXCuenta · Tiendas')],[report.title+' · '+metadata],[cutoff],
     ['Real y objetivo se calculan con las hojas Real diario y Metas. Sin registro conserva su objetivo.'],tableHead.map(head),...stores.map((row,i)=>storeCells(row,i+6)),
-    [{value:'TOTAL',style:6},null,null,null,formula(`SUM(${storeRange('E')})`,total.storeCount),formula(realFormula,total.realCents/100,8),formula(goalFormula,total.targetCents/100,8),total.completion==null?numeric(null,4):formula(`IF(G${last+1}>0,F${last+1}/G${last+1},0)`,total.completion,4),total.missingTargets?numeric(null,8):formula(`MAX(G${last+1}-F${last+1},0)`,total.gapCents/100,8),numeric(total.dailyDonations,5),formula(`SUM(${storeRange('K')})`,total.records)]
+    [{value:'TOTAL',style:6},null,null,null,formula(`SUM(${storeRange('E')})`,total.storeCount),formula(realFormula,total.realCents/100,8),formula(goalFormula,total.targetCents/100,8),total.completion==null?numeric(null,4):formula(`IF(G${last+1}>0,F${last+1}/G${last+1},0)`,total.completion,4),total.missingTargets?numeric(null,8):formula(`MAX(G${last+1}-F${last+1},0)`,total.gapCents/100,8),numeric(total.dailyDonations,5),formula(`SUM(${storeRange('K')})`,total.records),null,null,null,null,formula(`SUM(${storeRange('P')})`,total.campaignTargetCents/100,8),formula(`SUM(${storeRange('Q')})`,total.campaignRealCents/100,8),formula(`IF(P${last+1}>0,Q${last+1}/P${last+1},0)`,total.campaignCompletion,4),formula(`MAX(P${last+1}-Q${last+1},0)`,total.campaignGapCents/100,8)]
   ]};
   const actuals={name:'Real diario',widths:[11,18,40,21],header:5,dataEnd:5+report.actuals.length,merges:['A1:D1','A2:D2','A3:D3','A4:D4'],heights:{4:34},rows:[
     [title('VaXCuenta · Real diario')],['Fuente: Va X Cuenta.csv'],[metadata],['Importes originales en pesos. No se multiplican por el donativo de $10.'],['CeCo','Fecha','Tienda','Real MXN'].map(head),
@@ -117,9 +117,13 @@ export function buildXLSX(rows,total,data,state,context,storeRows){
     ['Tiendas incluidas',stores.length,`COUNTA(${storeRange('A')})`,stores.length,0],
     ['Filas reales del periodo',report.actuals.length,`COUNTA(${rawRange('A')})`,report.actuals.length,0],
     ['Tiendas sin registro',total.noRecordStores,`COUNTIF(${storeRange('K')},0)`,total.noRecordStores,0],
-    ['Tiendas con meta incompleta',stores.filter(row=>row.missingTargets).length,`COUNTIF(${storeRange('L')},"Meta incompleta")`,stores.filter(row=>row.missingTargets).length,0]
+    ['Tiendas con meta incompleta',stores.filter(row=>row.missingTargets).length,`COUNTIF(${storeRange('L')},"Meta incompleta")`,stores.filter(row=>row.missingTargets).length,0],
+    ['Meta total cargada vs. origen',total.campaignTargetCents/100,`SUM('Metas campaña'!E6:E${Math.max(6,5+report.campaignTargets.length)})`,total.campaignTargetCents/100,3],
+    ['Acumulado completo vs. origen',total.campaignRealCents/100,`SUM('Real campaña'!D6:D${Math.max(6,5+report.campaignActuals.length)})`,total.campaignRealCents/100,3],
+    ['Metas campaña vs. tiendas',total.campaignTargetCents/100,`SUM(${storeRange('P')})`,total.campaignTargetCents/100,3],
+    ['Real campaña vs. tiendas',total.campaignRealCents/100,`SUM(${storeRange('Q')})`,total.campaignRealCents/100,3]
   ];
-  const validation={name:'Validación',statusRange:'E9:E16',widths:[40,24,24,18,18],header:8,dataEnd:8+checks.length,merges:['A1:E1','A2:E2','A3:E3','A4:E4','A5:E5','A6:E6','A7:E7'],heights:{4:36,5:36,6:36},rows:[
+  const validation={name:'Validación',statusRange:`E9:E${8+checks.length}`,widths:[40,24,24,18,18],header:8,dataEnd:8+checks.length,merges:['A1:E1','A2:E2','A3:E3','A4:E4','A5:E5','A6:E6','A7:E7'],heights:{4:36,5:36,6:36},rows:[
     [title('VaXCuenta · Validación')],[report.title+' · '+metadata],[cutoff],
     ['1. Confirma región, periodo, número de tiendas y fecha del archivo en Resumen.'],
     ['2. Todas las diferencias de abajo deben ser 0 y el resultado OK. Si cambias el real o las metas, los controles lo señalarán.'],
@@ -131,7 +135,28 @@ export function buildXLSX(rows,total,data,state,context,storeRows){
   for(const note of [...report.rules,...report.warnings,report.dailyNote,report.sourceNote,`Fuentes: Va X Cuenta.csv · VaxCuenta Objetivos 26.xlsx · Directorio.xlsx. Revisión ${data.revision}.`]){
     validation.rows.push([note]);const line=validation.rows.length;validation.merges.push(`A${line}:E${line}`);validation.heights[line]=note.length>130?42:30;
   }
-  const sheets=[summary,validation,detail,actuals,targets];
+  const campaignReal={name:'Real campaña',widths:[11,18,40,21],header:5,dataEnd:5+report.campaignActuals.length,merges:['A1:D1','A2:D2','A3:D3','A4:D4'],rows:[
+    [title('VaXCuenta · Acumulado completo al corte')],[report.title],[cutoff],['Sólo CeCo con objetivo positivo. Importes originales en pesos.'],['CeCo','Fecha','Tienda','Real MXN'].map(head),
+    ...report.campaignActuals.map(row=>[row[0],numeric(Date.parse(`${row[1]}T00:00:00Z`)/86400000+25569,7),lookup.get(row[0]).name,numeric(row[2]/100,3)])]};
+  const campaignGoals={name:'Metas campaña',widths:[11,35,22,12,22],header:5,dataEnd:5+report.campaignTargets.length,merges:['A1:E1','A2:E2','A3:E3','A4:E4'],heights:{4:44},rows:[
+    [title('VaXCuenta · Objetivos de toda la campaña')],[report.title],[report.campaignNote],['Metas originales del Excel, incluyendo semanas futuras. No se estiman semanas faltantes.'],['CeCo','Tienda','Región vigente','Semana','Meta semanal MXN'].map(head),
+    ...report.campaignTargets.map(row=>[row[0],lookup.get(row[0]).name,lookup.get(row[0]).region,numeric(row[1]),numeric(row[2]/100,3)])]};
+  const campaign={name:'Campaña',widths:[40,12,23,23,18,23],header:0,merges:['A1:F1','A2:F2','A3:F3','A4:F4','A5:F5','A7:B7','C7:D7','E7:F7','A8:B8','C8:D8','E8:F8','A9:B9','C9:D9','E9:F9','A11:F11'],heights:{1:34,2:35,3:35,4:44,5:44,7:32,8:38,9:64},rows:[
+    [title('VaXCuenta · Avance de campaña')],[report.title],[`Campaña ${formatDate(data.config.campaign.start)} – ${formatDate(data.config.campaign.end,true)} · Corte ${formatDate(data.cutoff,true)}`],
+    [report.campaignNote],['Sólo CeCo con meta positiva. Avance = acumulado completo al corte ÷ meta total cargada. El detalle semanal no modifica esta comparación.'],[],
+    [head('Meta total cargada MXN'),null,head('Acumulado al corte MXN'),null,head('Avance campaña')],
+    [formula(`SUM(${storeRange('P')})`,total.campaignTargetCents/100,10),null,formula(`SUM(${storeRange('Q')})`,total.campaignRealCents/100,10),null,formula('IF(A8>0,C8/A8,0)',total.campaignCompletion,11)],
+    [{value:'Por recaudar MXN',style:6},null,formula('MAX(A8-C8,0)',total.campaignGapCents/100,8),null,report.campaignCoverage],[],
+    [{value:report.summaryLabel,style:6}],['Alcance','Tiendas','Meta total MXN','Acumulado MXN','Avance campaña','Por recaudar MXN'].map(head)]};
+  report.summaryRows.forEach((row,i)=>{const line=i+13,match=report.summaryView==='store'?null:`A${line}`;
+    const sum=col=>match?`SUMIF(${storeRange(groupColumn)},${match},${storeRange(col)})`:`SUM(${storeRange(col)})`;
+    campaign.rows.push([row.ceco?row.ceco+' · '+row.name:row.name,numeric(row.storeCount),formula(sum('P'),row.campaignTargetCents/100,3),formula(sum('Q'),row.campaignRealCents/100,3),formula(`IF(C${line}>0,D${line}/C${line},0)`,row.campaignCompletion,4),formula(`MAX(C${line}-D${line},0)`,row.campaignGapCents/100,3)]);
+    campaign.heights[line]=row.name.length>30?40:28;
+  });
+  const campaignEnd=12+report.summaryRows.length;
+  campaign.rows.push([{value:'TOTAL DEL ALCANCE',style:6},numeric(total.storeCount),formula('A8',total.campaignTargetCents/100,8),formula('C8',total.campaignRealCents/100,8),formula('E8',total.campaignCompletion,4),formula('C9',total.campaignGapCents/100,8)]);
+  for(const note of [report.campaignInterpretation,report.campaignCoverage,report.sourceNote]){campaign.rows.push([note]);const line=campaign.rows.length;campaign.merges.push(`A${line}:F${line}`);campaign.heights[line]=42;}
+  const sheets=[campaign,summary,validation,detail,actuals,targets,campaignReal,campaignGoals];
   const contentTypes=`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`;
   const rootRelationships=`<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`;
   const workbook=`<?xml version="1.0" encoding="UTF-8"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView activeTab="0"/></bookViews><sheets>${sheets.map((sheet,i)=>`<sheet name="${xml(sheet.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`;

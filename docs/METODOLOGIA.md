@@ -1,6 +1,14 @@
 # Reglas de VaXCuenta
 
-## Qué compara
+## Evaluación de campaña
+
+Sólo participan CeCo con suma de metas de campaña mayor a cero. La meta total cargada suma todas sus filas del Excel, incluyendo semanas futuras. El acumulado suma sus registros desde el inicio hasta el corte. Avance campaña = acumulado / meta total cargada; por recaudar = máximo(meta total cargada − acumulado, 0). Región y DM usan la razón de sumas, nunca el promedio de porcentajes.
+
+Si falta una semana, la base se identifica como **meta total cargada** y se señala la falta. No se extrapola ni se considera completa. Las tiendas con metas futuras se incluyen en la campaña. Los CeCo sin objetivo o con meta total cero se excluyen y sus pesos se concilian aparte en auditoría.
+
+El selector semanal cambia sólo el detalle del periodo. La meta total, el acumulado y el avance de campaña permanecen iguales para el mismo alcance. El corte proviene del último registro de CeCo con objetivo dentro de campaña.
+
+## Qué compara el detalle del periodo
 
 **Real** es la suma monetaria de `vaXcuenta$`, por CeCo y fecha. Se conservan los importes originales en centavos, incluidos ajustes o importes que no son múltiplos de $10.
 
@@ -16,7 +24,7 @@ La semana 40 tiene lunes **28/sept/2026** y domingo **4/oct/2026**. Cada semana 
 
 Las fechas de la exportación original están en **mes/día/año**. `10/11/2026` significa **11 de octubre**, no 10 de noviembre. También se admiten fechas ISO `AAAA-MM-DD`.
 
-El corte general es la fecha máxima de las filas reales **dentro de la campaña**. La fecha de consulta, la de publicación y la última meta cargada no adelantan el corte. Una tienda puede tener un último registro anterior: se muestra ese dato en su detalle, pero su comparación usa el corte común para el mismo alcance.
+El corte general es la fecha máxima de las filas reales **de CeCo con objetivo dentro de la campaña**. La fecha de consulta, la de publicación y la última meta cargada no adelantan el corte. Una tienda puede tener un último registro anterior: se muestra ese dato en su detalle, pero su comparación usa el corte común para el mismo alcance.
 
 Las exportaciones nuevas deben contener el acumulado desde el inicio. Se rechaza un corte que retrocede o un reemplazo que pierde las primeras fechas de la carga anterior. Una corrección del mismo corte actualiza los importes y la revisión publicada. Los datos no se añaden por duplicado.
 
@@ -38,7 +46,7 @@ La meta de una semana parcial se redondea al centavo por tienda antes de agregar
 
 Se une por **CeCo**, nunca por nombre. Cada objetivo debe tener una clave única **CeCo + semana** y cada real **CeCo + fecha**. El importador rechaza duplicados financieros y conserva el último sitio válido durante una carga fallida. Las filas repetidas del directorio se consolidan sólo cuando coinciden nombre, Región y DM, sin multiplicar importes. Una asignación contradictoria detiene la actualización.
 
-Las tiendas con metas que comienzan después del corte no entran todavía al alcance de ese periodo. Una tienda activa que no tiene fila de recaudación conserva su objetivo y se identifica como **sin registro**. Eso no asegura que su recaudación real sea cero; sólo indica que el archivo no la reporta.
+Las tiendas con metas futuras permanecen en el alcance de campaña; no aportan objetivo al corte antes de su primera semana de meta. Una tienda activa que no tiene fila de recaudación conserva su objetivo y se identifica como **sin registro**. Eso no asegura que su recaudación real sea cero; sólo indica que el archivo no la reporta.
 
 En cada alcance:
 
@@ -50,9 +58,9 @@ Faltante = máximo(Objetivo al corte - Recaudado, 0)
 Donativos equivalentes = Recaudado / $10
 ```
 
-Los porcentajes de tiendas **no se promedian** para obtener un DM o Región. Se utiliza la razón de sus totales. El avance puede superar 100%; el tablero conserva el porcentaje y muestra cuánto se supera la meta.
+Los porcentajes de tiendas **no se promedian** para obtener un DM o Región. Se utiliza la razón de sus totales. El avance puede superar 100%; el tablero conserva el porcentaje y muestra por recaudar igual a cero.
 
-Una tienda con recaudación y meta ausente mantiene sus pesos visibles. El alcance afectado identifica el objetivo como incompleto y no muestra un porcentaje que mezcle esa recaudación con un denominador insuficiente.
+Una tienda sin objetivo positivo no se evalúa. Si una tienda sí tiene meta de campaña pero le falta una semana del periodo, el detalle de ese periodo señala objetivo incompleto; la campaña conserva su comparación contra la meta total cargada, señalando las metas pendientes.
 
 ## Asignaciones y diferencias del origen
 
@@ -60,7 +68,7 @@ El nombre, la región y el DM se toman de **data/Directorio.xlsx de VaXCuenta**,
 
 Si una tienda falta en el directorio, su región es **Por asignar** y su DM **DM pendiente de asignación**. El nombre del Excel de objetivos funciona como referencia mientras se incorpora al directorio; sus importes no se excluyen. Una asignación contradictoria de nombre, región o DM para el mismo CeCo rechaza la carga antes de escribir el corte. Las filas repetidas coincidentes se consolidan. Un estatus de apertura contradictorio se marca **Por confirmar**, sin excluir ni multiplicar los importes.
 
-Con los archivos actuales, Centro Norte en semana 40 tiene **72 CeCo y $132,480 de objetivo**. Atana Lindavista (43194) está en Centro Norte. La suma de objetivos se verifica por CeCo frente al Excel; la distribución regional sigue el directorio. El origen no incluye metas ni real para todos los CeCo del directorio: el tablero muestra tiendas con meta activa o recaudación en el periodo.
+Con los archivos actuales, Centro Norte tiene **73 CeCo con objetivo de campaña** y **$1,198,560 de meta total cargada**. La meta conocida de semana 40 es **$132,480**. Atana Lindavista (43194) está en Centro Norte. La suma de objetivos se verifica por CeCo frente al Excel; la distribución regional sigue el directorio. El origen no incluye metas ni real para todos los CeCo del directorio: el tablero muestra sólo tiendas con objetivo total positivo.
 
 La tienda Miguel Aleman MTY no tiene un CeCo válido en el Excel: no se le atribuye la recaudación de otra tienda. Sus metas se conservan como pendientes en la auditoría.
 
@@ -68,9 +76,9 @@ La tienda Miguel Aleman MTY no tiene un CeCo válido en el Excel: no se le atrib
 
 Se conserva el alcance, periodo y búsqueda al abrir Exportar. La búsqueda pendiente se aplica antes de tomar la consulta. El resumen monetario se comprueba contra todas las tiendas y las filas originales del mismo periodo; una inconsistencia bloquea la descarga y muestra su causa.
 
-**Resumen PDF** agrupa las mismas tiendas por Región en el alcance nacional y por DM cuando se elige una Región. Una tienda individual se identifica por CeCo y nombre. El resumen muestra real, objetivo, avance, faltante, cobertura de registros y reglas del periodo. El **PDF con todas las tiendas** añade la lista completa de CeCo; las filas no se recortan para resumir.
+**Resumen PDF** agrupa las mismas tiendas por Región en el alcance nacional y por DM cuando se elige una Región. Una tienda individual se identifica por CeCo y nombre. El resumen muestra meta total cargada, acumulado al corte, avance de campaña, por recaudar y cobertura. También identifica el detalle del periodo como comparación secundaria. El **PDF con todas las tiendas** añade la lista completa de CeCo; las filas no se recortan para resumir.
 
-**Excel** abre en Resumen. Tiendas calcula el real desde Real diario y el objetivo desde Metas mediante CeCo. Metas conserva el importe semanal y la proyección diaria del Excel original, y calcula la meta del periodo con los días aplicables. La semana 40 utiliza siete días de objetivo aunque sólo haya cuatro días de campaña; una semana posterior parcial usa sus días calendario al corte. Se redondea por tienda al centavo.
+**Excel** abre en Campaña; esa hoja y las columnas P:S de Tiendas concilian el acumulado y los objetivos completos mediante Real campaña y Metas campaña. Resumen conserva el detalle del periodo. Tiendas calcula el real desde Real diario y el objetivo desde Metas mediante CeCo. Metas conserva el importe semanal y la proyección diaria del Excel original, y calcula la meta del periodo con los días aplicables. La semana 40 utiliza siete días de objetivo aunque sólo haya cuatro días de campaña; una semana posterior parcial usa sus días calendario al corte. Se redondea por tienda al centavo.
 
 La hoja Validación observa esas fuentes y cálculos: compara el real y las metas con el corte original, comprueba la conciliación del detalle, cuenta tiendas y filas, e identifica faltas de registro o meta. Sus resultados son terminales: no determinan importes ni alimentan la proyección. Modificar una fuente dentro del Excel actualiza los importes y cambia a REVISAR el control contra el corte original.
 

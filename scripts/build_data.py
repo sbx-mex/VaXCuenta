@@ -2,6 +2,7 @@
 import csv
 import hashlib
 import io
+import math
 import json
 import re
 import unicodedata
@@ -140,7 +141,7 @@ def read_targets(path, donation):
         if row[5] is None or row[6] is None or row[7] is None:
             raise ValueError(f"Meta incompleta: CeCo {key}, semana {week}.")
         weekly, daily, amount = float(row[5]), float(row[6]), cents(row[7])
-        if min(weekly, daily, amount) < 0 or abs(weekly * donation * 100 - amount) > 1:
+        if not all(math.isfinite(v) for v in (weekly, daily)) or min(weekly, daily, amount) < 0 or abs(weekly * donation * 100 - amount) > 1:
             raise ValueError(f"Meta semanal no concilia con donativo de ${donation}: {key}, semana {week}.")
         identity = {"ceco": key, "name": str(row[1] or key).strip(), "targetRegion": str(row[2] or "Por asignar").strip(), "state": str(row[3] or "").strip()}
         if key in stores and stores[key] != identity:
@@ -200,20 +201,27 @@ def build(root=ROOT):
     directory_path = root / "data/Directorio.xlsx"
     records = read_real(real_path, config)
     directory, directory_conflicts, duplicates = read_directory(directory_path)
+    stores, targets, excluded_targets = read_targets(target_path, config["campaign"]["donationPesos"])
+    source_campaign = [r for r in records if start <= r[1] <= end]
+    objective_sums = defaultdict(int)
+    for key, _, amount, *_ in targets:
+        objective_sums[key] += amount
+    target_keys = {key for key, amount in objective_sums.items() if amount > 0}
+    excluded_directory_conflicts = sorted(set(directory_conflicts) - target_keys)
+    directory_conflicts = sorted(set(directory_conflicts) & target_keys)
     if directory_conflicts:
         raise ValueError("Asignaciones distintas para el mismo CeCo en Directorio: " + ", ".join(directory_conflicts))
-    stores, targets, excluded_targets = read_targets(target_path, config["campaign"]["donationPesos"])
-    campaign = [r for r in records if start <= r[1] <= end]
+    zero_objective_stores = sorted(set(stores) - target_keys)
+    stores = {key: store for key, store in stores.items() if key in target_keys}
+    targets = [row for row in targets if row[0] in target_keys]
+    without_objective = [row for row in source_campaign if row[0] not in target_keys]
+    campaign = [row for row in source_campaign if row[0] in target_keys]
     excluded = [r for r in records if not start <= r[1] <= end]
     if not campaign:
         raise ValueError("No hay datos dentro del 1/oct–30/nov/2026.")
     validate_cumulative(root, config, campaign)
     cutoff = max(r[1] for r in campaign)
-    target_keys = set(stores)
-    real_without_target = sorted({r[0] for r in campaign} - target_keys)
-    for key, _, _ in campaign:
-        if key not in stores:
-            stores[key] = {"ceco": key, "name": f"Tienda {key}", "targetRegion": "Por asignar", "state": ""}
+    real_without_target = sorted({r[0] for r in without_objective})
     missing_dm, region_changes, name_changes, missing_directory, incomplete_directory = [], [], [], [], []
     for key, store in stores.items():
         entry = directory.get(key)
@@ -260,28 +268,46 @@ def build(root=ROOT):
     if missing_days:
         warnings.append(f"La exportación no tiene registros en {len(missing_days)} días hasta el corte. No se inventan importes; el objetivo conserva los días calendario del periodo.")
     if real_without_target:
-        warnings.append(f"{len(real_without_target)} tiendas tienen recaudación sin una meta en el Excel; sus pesos se conservan y la comparación del alcance afectado se marca como incompleta.")
+        warnings.append(f"{len(real_without_target)} tiendas tienen recaudación sin una meta en el Excel; se excluyen de todos los filtros, avances y reportes. Sus importes quedan conciliados en auditoría.")
+    if zero_objective_stores:
+        warnings.append(f"{len(zero_objective_stores)} CeCo con meta total cero se excluyen de la evaluación.")
     if missing_dm:
         warnings.append(f"{len(missing_dm)} tiendas sin DM confirmado; sus importes se conservan en Región y Tienda y en el grupo DM pendiente de asignación.")
     if missing_directory:
         warnings.append(f"{len(missing_directory)} tiendas con meta o real no aparecen en Directorio.xlsx; conservan sus importes en Por asignar hasta confirmar su región y DM.")
-    status_conflicts = sorted(key for key, entry in directory.items() if entry.get("statusConflict"))
+    status_conflicts = sorted(key for key, entry in directory.items() if key in target_keys and entry.get("statusConflict"))
     if status_conflicts:
         warnings.append(f"{len(status_conflicts)} CeCo tienen estatus distintos en filas del directorio; se muestran como Por confirmar. Esto no excluye ni duplica sus importes.")
     if expected_weeks - available_weeks:
-        warnings.append("Falta el objetivo de la semana 49 (30 de noviembre). No se extrapola ni se presenta una meta total de campaña completa.")
+        warnings.append(f"Faltan metas para las semanas {sorted(expected_weeks - available_weeks)}. La meta total cargada suma sólo los importes del Excel; el avance se mide contra esa base y no representa una meta completa. No se extrapolan importes.")
     if excluded_targets:
         warnings.append(f"{len(excluded_targets)} metas de Miguel Aleman MTY tienen CeCo pendiente; se conservan en la auditoría sin atribuirles recaudación.")
     if non_ten:
         warnings.append(f"{len(non_ten)} importes no son múltiplos de $10; se preservan. Recaudado / $10 expresa donativos equivalentes, no tickets comprobados.")
     if region_changes:
         warnings.append(f"{len(region_changes)} tiendas cambiaron de región respecto al Excel de metas. Región, DM y nombre siguen Directorio.xlsx; el real y las metas se agrupan juntos por CeCo y conservan sus totales nacionales.")
+    by_store_weeks = defaultdict(set)
+    for key, week, *_ in targets:
+        by_store_weeks[key].add(week)
+    campaign_missing = {key: sorted({w for w in expected_weeks if w >= min(assigned)} - assigned)
+                        for key, assigned in by_store_weeks.items()}
+    campaign_missing = {key: weeks for key, weeks in campaign_missing.items() if weeks}
     audit = {
         "status": "verified-with-source-notes", "cutoff": cutoff.isoformat(),
         "rawRows": len(records), "campaignRows": len(campaign), "excludedRows": len(excluded),
         "rawCents": sum(r[2] for r in records), "campaignCents": sum(r[2] for r in campaign),
         "excludedCents": sum(r[2] for r in excluded),
+        "sourceCampaignCents": sum(r[2] for r in source_campaign),
+        "sourceCampaignRows": len(source_campaign),
+        "excludedNoObjectiveCents": sum(r[2] for r in without_objective),
+        "excludedNoObjectiveRows": len(without_objective),
+        "excludedNoObjectiveStores": real_without_target,
+        "zeroObjectiveStores": zero_objective_stores,
+        "campaignMissingTargets": campaign_missing,
+        "campaignGoalComplete": not campaign_missing,
+        "campaignCompletion": sum(r[2] for r in campaign) / sum(row[2] for row in targets),
         "objectiveRows": len(targets), "targetStores": len(stores), "actualStores": len({r[0] for r in campaign}),
+        "excludedDirectoryConflicts": excluded_directory_conflicts,
         "directoryDuplicateKeysCollapsed": duplicates, "directoryConflicts": directory_conflicts,
         "missingDm": missing_dm, "regionChanges": region_changes,
         "assignmentSource": "data/Directorio.xlsx", "directoryStores": len(directory),
@@ -293,12 +319,12 @@ def build(root=ROOT):
         "noRealRecord": missing_real, "missingDays": missing_days, "realWithoutTarget": real_without_target, "dailyRecordCounts": dict(sorted(day_counts.items())),
         "sourceHashes": source_hashes, "warnings": warnings
     }
-    if audit["rawCents"] != audit["campaignCents"] + audit["excludedCents"]:
+    if audit["rawCents"] != audit["campaignCents"] + audit["excludedCents"] + audit["excludedNoObjectiveCents"]:
         raise ValueError("No conciliaron los importes del CSV.")
     payload = {"schemaVersion": 1, "config": config, "cutoff": cutoff.isoformat(),
                "calendar": weeks, "stores": sorted(stores.values(), key=lambda x: x["ceco"]),
                "targets": sorted(targets), "actuals": real_rows,
-               "notes": warnings, "sourceSummary": {key: audit[key] for key in ("campaignRows", "excludedRows", "excludedCents", "actualStores", "missingDm", "missingCampaignWeeks", "amountsNotMultipleOf10", "noRealRecord", "missingDays", "missingDirectory", "regionChanges", "nameChanges", "directoryStatusConflicts", "directoryDuplicateKeysCollapsed", "assignmentSource")}}
+               "notes": warnings, "sourceSummary": {key: audit[key] for key in ("campaignRows", "excludedRows", "excludedCents", "actualStores", "missingDm", "missingCampaignWeeks", "amountsNotMultipleOf10", "noRealRecord", "missingDays", "missingDirectory", "regionChanges", "nameChanges", "directoryStatusConflicts", "directoryDuplicateKeysCollapsed", "assignmentSource", "excludedNoObjectiveCents", "excludedNoObjectiveRows", "excludedNoObjectiveStores", "zeroObjectiveStores", "campaignGoalComplete", "objectiveCents")}}
     canonical = json.dumps(payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
     payload["revision"] = hashlib.sha256(canonical.encode()).hexdigest()[:16]
     atomic_write(root / "data/dashboard.json", json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
@@ -308,11 +334,13 @@ def build(root=ROOT):
                f"- Campaña: {len(campaign):,} filas; **${audit['campaignCents']/100:,.2f}**.",
                f"- Fuera de campaña: {len(excluded):,} filas; ${audit['excludedCents']/100:,.2f}.",
                f"- Metas válidas: {len(targets):,} filas por CeCo y semana; sin claves repetidas.",
-               f"- Tiendas con meta o real: {len(stores):,}; con recaudación: {audit['actualStores']:,}.",
+               f"- Tiendas con meta total positiva: {len(stores):,}; con recaudación: {audit['actualStores']:,}.",
                f"- Claves duplicadas del directorio consolidadas sin sumar importes: {len(duplicates)}.",
                "- Fechas del CSV interpretadas como mes/día/año (10/11/2026 = 11 de octubre).",
                "- El corte proviene de las fechas dentro de campaña, nunca de la fecha de publicación.",
-               "- Conciliación: CSV completo = real de campaña + importes fuera de campaña.",
+               f"- Meta total cargada: **${audit['objectiveCents']/100:,.2f}**; avance contra esa base: **{audit['campaignCompletion']:.2%}**.",
+               f"- Sin objetivo: {len(without_objective):,} filas; ${audit['excludedNoObjectiveCents']/100:,.2f}; excluidas de la evaluación.",
+               "- Conciliación: CSV completo = campaña evaluada + fuera de campaña + campaña sin objetivo.",
                "", "## Notas del origen", ""] + ["- " + warning for warning in warnings]
     summary += ["", "## Tiendas con DM pendiente", "", ", ".join(missing_dm), "", "## Procedencia", "",
                 "Recaudación y metas: archivos adjuntos originales, conservados en data/.",
