@@ -1,4 +1,6 @@
 import {escapeHTML as e, money, number, percent, formatDate} from './model.mjs';
+export {downloadXLSX} from './xlsx-export.mjs';
+export {downloadPDF} from './pdf-export.mjs';
 
 export function csvCell(value) {
   let text = String(value ?? '');

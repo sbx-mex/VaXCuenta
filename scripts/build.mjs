@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const dist=path.join(root,'dist');
-const publicFiles=['index.html','styles.css','app.mjs','model.mjs','export.mjs','pwa.mjs','manifest.webmanifest','data/dashboard.json'];
+const publicFiles=['index.html','styles.css','app.mjs','model.mjs','report.mjs','export.mjs','xlsx-export.mjs','pdf-export.mjs','vendor/pdf-lib.min.js','vendor/pdf-lib.LICENSE.md','vendor/pdf-fonts.mjs','vendor/pdf-fonts.LICENSE.txt','pwa.mjs','manifest.webmanifest','data/dashboard.json'];
 const inputs=[...publicFiles,'scripts/sw.template.js'];
 async function listAssets(directory='assets'){
   const results=[];

@@ -1,9 +1,10 @@
 /* VERSION is replaced by the build; each project path owns its own cache. */
-const VERSION = '61dc588e86336398';
+const VERSION = '6ee5d4e435941737';
 const BASE = new URL('./', self.registration.scope);
 const PREFIX = `vaxcuenta-${BASE.pathname}-`;
 const CACHE = PREFIX + VERSION;
 const SHELL = ['./','./index.html','./styles.css','./app.mjs','./model.mjs','./export.mjs','./pwa.mjs',
+  './report.mjs','./xlsx-export.mjs','./pdf-export.mjs','./vendor/pdf-lib.min.js','./vendor/pdf-fonts.mjs',
   './manifest.webmanifest','./assets/icon.svg','./assets/campaign-frame.png','./assets/icon-192.png',
   './assets/icon-512.png','./assets/icon-maskable-512.png','./assets/apple-touch-icon.png','./data/dashboard.json'];
 self.addEventListener('install', event => {

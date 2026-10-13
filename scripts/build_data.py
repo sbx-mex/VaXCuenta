@@ -206,12 +206,15 @@ def build(root=ROOT):
     missing_dm, region_changes = [], []
     for key, store in stores.items():
         entry = directory.get(key)
-        store["region"] = (entry or {}).get("region") or store["targetRegion"]
+        # El alcance financiero conserva la región de la misma fuente de metas.
+        # El directorio complementa DM y tiendas con real sin una meta asignada.
+        store["directoryRegion"] = (entry or {}).get("region")
+        store["region"] = store["targetRegion"] if key in target_keys else store["directoryRegion"] or store["targetRegion"]
         store["dm"] = (entry or {}).get("dm") or PENDING_DM
         if store["dm"] == PENDING_DM:
             missing_dm.append(key)
-        if entry and entry["region"] and store["region"] != store["targetRegion"]:
-            region_changes.append({"ceco": key, "targetRegion": store["targetRegion"], "directoryRegion": store["region"]})
+        if key in target_keys and entry and entry["region"] and entry["region"] != store["targetRegion"]:
+            region_changes.append({"ceco": key, "targetRegion": store["targetRegion"], "directoryRegion": entry["region"]})
     weeks = calendar(config)
     expected_weeks = {week["week"] for week in weeks}
     if any(row[1] not in expected_weeks for row in targets):
@@ -246,7 +249,7 @@ def build(root=ROOT):
     if non_ten:
         warnings.append(f"{len(non_ten)} importes no son múltiplos de $10; se preservan. Recaudado / $10 expresa donativos equivalentes, no tickets comprobados.")
     if region_changes:
-        warnings.append(f"{len(region_changes)} tiendas tienen regiones distintas entre Excel y directorio. Región y DM se toman del directorio operativo.")
+        warnings.append(f"{len(region_changes)} tiendas tienen regiones distintas entre metas y directorio. VaXCuenta conserva la región del Excel de metas y utiliza el directorio para el DM; así los objetivos regionales concilian con el archivo original.")
     audit = {
         "status": "verified-with-source-notes", "cutoff": cutoff.isoformat(),
         "rawRows": len(records), "campaignRows": len(campaign), "excludedRows": len(excluded),
@@ -283,7 +286,8 @@ def build(root=ROOT):
                "", "## Notas del origen", ""] + ["- " + warning for warning in warnings]
     summary += ["", "## Tiendas con DM pendiente", "", ", ".join(missing_dm), "", "## Procedencia", "",
                 "Recaudación y metas: archivos adjuntos originales, conservados en data/.",
-                "Región y DM: https://github.com/sbx-mex/Esfuerzo_Operativo/blob/main/data/Directorio.xlsx",
+                "Región financiera: VaxCuenta Objetivos 26.xlsx, vinculada por CeCo.",
+                "DM y región de referencia: https://github.com/sbx-mex/Esfuerzo_Operativo/blob/main/data/Directorio.xlsx",
                 f"Blob GitHub del directorio: {config['directoryBlobSha']}.",
                 "Los hashes SHA-256 y el detalle de incidencias están en audit.json.", ""]
     atomic_write(root / "docs/AUDITORIA.md", "\n".join(summary))

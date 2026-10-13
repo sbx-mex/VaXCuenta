@@ -34,17 +34,17 @@ test('región, DM and tienda give the same financial totals',()=>{
     const groups=groupRows(rows,view);assert.equal(groups.reduce((sum,r)=>sum+r.realCents,0),total.realCents);assert.equal(groups.reduce((sum,r)=>sum+r.targetCents,0),total.targetCents);
   }
 });
-test('regional results use the operational directorio on both real and goal',()=>{
-  const row=metricForStore(prepared,'43194');assert.equal(row.region,'Centro Norte');assert.equal(row.targetRegion,'Centro Poniente');
-  assert.ok(selectStores(prepared,{region:'Centro Norte'}).some(r=>r.ceco==='43194'));
-  assert.ok(!selectStores(prepared,{region:'Centro Poniente'}).some(r=>r.ceco==='43194'));
+test('regional results retain the goal workbook region while directory supplies DM',()=>{
+  const row=metricForStore(prepared,'43194');assert.equal(row.region,'Centro Poniente');assert.equal(row.targetRegion,'Centro Poniente');assert.equal(row.directoryRegion,'Centro Norte');
+  assert.ok(!selectStores(prepared,{region:'Centro Norte'}).some(r=>r.ceco==='43194'));
+  assert.ok(selectStores(prepared,{region:'Centro Poniente'}).some(r=>r.ceco==='43194'));
 });
 test('missing DM shops are retained once and have an explicit group',()=>{
   const rows=selectStores(prepared), pending=groupRows(rows,'dm').find(r=>r.id===PENDING_DM);
   assert.equal(pending.storeCount,1);assert.equal(new Set(rows.map(r=>r.ceco)).size,rows.length);
 });
 test('weighted completion is a ratio of sums',()=>{
-  const total=aggregate(selectStores(prepared,{region:'Centro Norte'}));
+  const total=aggregate(selectStores(prepared,{region:'Centro Poniente'}));
   assert.equal(total.completion,total.realCents/total.targetCents);
 });
 test('store and DM filters restrict the same universe as exports',()=>{
@@ -99,7 +99,7 @@ test('corrected real amounts at the same cutoff recompute totals',()=>{
   assert.equal(aggregate(selectStores(prepare(clone))).realCents,1195000);
 });
 test('exports preserve filtered total and numeric daily objectives',()=>{
-  const rows=selectStores(prepared,{region:'Centro Norte'}),groups=groupRows(rows,'dm'),total=aggregate(rows);
+  const rows=selectStores(prepared,{region:'Centro Poniente'}),groups=groupRows(rows,'dm'),total=aggregate(rows);
   const csv=buildCSV(groups,total,data,{view:'dm',period:'all'});assert.ok(csv.startsWith('\ufeff'));assert.ok(csv.includes('Objetivo donativos diarios'));assert.ok(csv.includes(`"${total.realCents/100}"`));assert.equal(csv.split('\r\n').length,groups.length+2);
 });
 test('CSV prevents formula injection in names without corrupting numeric negatives',()=>{

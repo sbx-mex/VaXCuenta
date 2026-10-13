@@ -175,6 +175,6 @@
     "Falta el objetivo de la semana 49 (30 de noviembre). No se extrapola ni se presenta una meta total de campaña completa.",
     "5 metas de Miguel Aleman MTY tienen CeCo pendiente; se conservan en la auditoría sin atribuirles recaudación.",
     "14 importes no son múltiplos de $10; se preservan. Recaudado / $10 expresa donativos equivalentes, no tickets comprobados.",
-    "7 tiendas tienen regiones distintas entre Excel y directorio. Región y DM se toman del directorio operativo."
+    "7 tiendas tienen regiones distintas entre metas y directorio. VaXCuenta conserva la región del Excel de metas y utiliza el directorio para el DM; así los objetivos regionales concilian con el archivo original."
   ]
 }

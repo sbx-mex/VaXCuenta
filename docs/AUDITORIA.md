@@ -18,7 +18,7 @@ Información real al **2026-10-11**.
 - Falta el objetivo de la semana 49 (30 de noviembre). No se extrapola ni se presenta una meta total de campaña completa.
 - 5 metas de Miguel Aleman MTY tienen CeCo pendiente; se conservan en la auditoría sin atribuirles recaudación.
 - 14 importes no son múltiplos de $10; se preservan. Recaudado / $10 expresa donativos equivalentes, no tickets comprobados.
-- 7 tiendas tienen regiones distintas entre Excel y directorio. Región y DM se toman del directorio operativo.
+- 7 tiendas tienen regiones distintas entre metas y directorio. VaXCuenta conserva la región del Excel de metas y utiliza el directorio para el DM; así los objetivos regionales concilian con el archivo original.
 
 ## Tiendas con DM pendiente
 
@@ -27,6 +27,7 @@ Información real al **2026-10-11**.
 ## Procedencia
 
 Recaudación y metas: archivos adjuntos originales, conservados en data/.
-Región y DM: https://github.com/sbx-mex/Esfuerzo_Operativo/blob/main/data/Directorio.xlsx
+Región financiera: VaxCuenta Objetivos 26.xlsx, vinculada por CeCo.
+DM y región de referencia: https://github.com/sbx-mex/Esfuerzo_Operativo/blob/main/data/Directorio.xlsx
 Blob GitHub del directorio: 016a92992def31e7b5a45c1b82eaf355948a1909.
 Los hashes SHA-256 y el detalle de incidencias están en audit.json.

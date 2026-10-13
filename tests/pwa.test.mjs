@@ -23,6 +23,7 @@ test('manifest start, scope and app id stay relative to a GitHub repository subp
 test('service worker precaches all assets within the project path',async()=>{
   const env=environment();let promise;env.listeners.install({waitUntil:p=>promise=p});await promise;
   assert.ok(env.store.has('https://sbx-mex.github.io/VaXCuenta/data/dashboard.json'));
+  for(const path of ['report.mjs','xlsx-export.mjs','pdf-export.mjs','vendor/pdf-lib.min.js','vendor/pdf-fonts.mjs'])assert.ok(env.store.has('https://sbx-mex.github.io/VaXCuenta/'+path));
   assert.ok([...env.store.keys()].every(key=>key.startsWith('https://sbx-mex.github.io/VaXCuenta/')));
 });
 test('service worker removes old versions of this project only',async()=>{

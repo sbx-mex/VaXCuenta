@@ -1,6 +1,7 @@
 import {prepare, selectStores, aggregate, groupRows, weeklySeries, dailySeries, metricForStore, targetAtCutoff,
   formatDate, money, number, percent, escapeHTML as e, periodWindow, PENDING_DM} from './model.mjs';
-import {downloadCSV, printReport} from './export.mjs';
+import {downloadXLSX, downloadPDF} from './export.mjs';
+import {buildReport} from './report.mjs';
 import {setupPWA} from './pwa.mjs';
 
 const $ = id => document.getElementById(id);
@@ -117,7 +118,7 @@ function render() {
   $('export').disabled=!scopeRows.length;
   $('cutoff').textContent=formatDate(data.cutoff,true); $('footer-cutoff').textContent=`Información real al ${formatDate(data.cutoff,true)}`;
   $('source-note-count').textContent=`${data.notes.length} notas`;
-  $('source-notes-content').innerHTML=`<p>Real: exportación Va X Cuenta. Objetivo: VaxCuenta Objetivos 26. Región y DM: directorio operativo de Esfuerzo Operativo, vinculados por CeCo.</p><p>${e(number(data.sourceSummary.excludedRows,0))} registros previos al inicio de la campaña (${e(money(data.sourceSummary.excludedCents))}) quedan fuera del avance. ${e(number(data.sourceSummary.noRealRecord.length,0))} tiendas activas no tienen fila de recaudación en la campaña; se muestran como sin registro.</p><ul>${data.notes.map(note=>`<li>${e(note)}</li>`).join('')}</ul><p class="source-revision">Corte ${e(formatDate(data.cutoff,true))} · Revisión ${e(data.revision)}</p>`;
+  $('source-notes-content').innerHTML=`<p>Real: exportación Va X Cuenta. Objetivo y región financiera: VaxCuenta Objetivos 26. DM: directorio operativo de Esfuerzo Operativo. Los archivos se vinculan por CeCo.</p><p>${e(number(data.sourceSummary.excludedRows,0))} registros previos al inicio de la campaña (${e(money(data.sourceSummary.excludedCents))}) quedan fuera del avance. ${e(number(data.sourceSummary.noRealRecord.length,0))} tiendas activas no tienen fila de recaudación en la campaña; se muestran como sin registro.</p><ul>${data.notes.map(note=>`<li>${e(note)}</li>`).join('')}</ul><p class="source-revision">Corte ${e(formatDate(data.cutoff,true))} · Revisión ${e(data.revision)}</p>`;
   renderCalendar(); syncURL();
 }
 
@@ -140,9 +141,25 @@ function showStore(row) {
 }
 $('help').addEventListener('click',()=>showModal('Cómo leer VaXCuenta',`<p>La consulta inicia en el acumulado de la campaña al último dato real. Elige Región, DM o Tienda para enfocar la información.</p><ol><li><b>Recaudado real:</b> suma de los pesos registrados en el CSV, dentro del periodo elegido.</li><li><b>Objetivo al corte:</b> suma de las metas de las mismas tiendas. La semana 40 conserva su objetivo semanal completo; el real sólo considera del 1 al 4 de octubre. Las siguientes semanas en curso usan la proporción de días calendario hasta el corte.</li><li><b>Avance:</b> recaudado ÷ objetivo. Un resultado de 100% significa que se alcanzó la proyección del periodo.</li><li><b>Faltante:</b> pesos necesarios para alcanzar ese objetivo. Si se supera, verás el importe sobre el objetivo.</li></ol><h3>El objetivo diario es un número</h3><p>Se muestra el dato de donativos diarios del Excel, sin convertirlo a moneda. Algunas tiendas tienen una base diaria distinta de siete días; se conserva el dato original. La comparación monetaria usa la meta semanal.</p><h3>Sobre el 7%</h3><p>Es la participación utilizada para construir la proyección. Este CSV sólo contiene recaudación: el tablero no calcula participación real en tickets.</p><p>Región, DM y Tienda son niveles de consulta. El botón Exportar utiliza exactamente los filtros de la pantalla.</p>`));
 $('export').addEventListener('click',()=>{
-  showModal('Exportar esta consulta',`<p>${e(context.title)} · ${e(context.meta)}. Se incluyen los ${e(number(grouped.length,0))} resultados de este alcance.</p><button type="button" id="export-pdf" class="export-choice"><span class="export-icon">PDF</span><span><strong>Imprimir / Guardar como PDF</strong><small>Resumen y lista completa de la consulta, en formato horizontal.</small></span></button><button type="button" id="export-csv" class="export-choice"><span class="export-icon">CSV</span><span><strong>Descargar tabla para Excel</strong><small>Importes y objetivo diario como números; archivo CSV.</small></span></button>`);
-  $('export-csv').addEventListener('click',()=>{downloadCSV(grouped,total,prepared.data,state);$('modal').close();toast('Tabla exportada con los filtros de esta consulta.');});
-  $('export-pdf').addEventListener('click',()=>{if(printReport(grouped,total,prepared.data,state,context))$('modal').close();else toast('Permite abrir la ventana de impresión para guardar el PDF.');});
+  clearTimeout(searchTimer);render();
+  const snapshot={rows:[...grouped],stores:[...scopeRows],total:{...total},data:prepared.data,state:{...state},context:{...context}};
+  let report;
+  try{report=buildReport(snapshot.rows,snapshot.total,snapshot.data,snapshot.state,snapshot.context,snapshot.stores);}
+  catch(error){toast(error.message);return;}
+  showModal('Exportar el reporte',`<div class="export-preview"><p><b>${e(report.title)}</b><br>${e(report.period)} · Real: ${e(report.dates)}<br>Archivo actualizado al ${e(formatDate(snapshot.data.cutoff,true))}${report.search?'<br>Búsqueda: '+e(report.search):''}</p><dl><div><dt>Real MXN</dt><dd>${e(money(snapshot.total.realCents))}</dd></div><div><dt>Objetivo MXN</dt><dd>${e(money(snapshot.total.targetCents))}</dd></div><div><dt>Avance</dt><dd>${e(percent(snapshot.total.completion))}</dd></div><div><dt>Tiendas</dt><dd>${number(snapshot.total.storeCount,0)}</dd></div></dl><p>${e(report.coverage)}</p></div><button type="button" id="export-pdf" class="export-choice"><span class="export-icon">PDF</span><span><strong>Descargar resumen PDF</strong><small>${e(report.summaryLabel)}, lectura del avance y datos que requieren revisión.</small></span></button><button type="button" id="export-xlsx" class="export-choice"><span class="export-icon">XLSX</span><span><strong>Descargar Excel para validar</strong><small>Empieza en Resumen. Revisa los controles y rastrea el real y las metas por CeCo.</small></span></button><button type="button" id="export-pdf-detail" class="export-choice export-secondary"><span class="export-icon">PDF</span><span><strong>Descargar PDF con todas las tiendas</strong><small>Resumen más detalle de los ${number(snapshot.total.storeCount,0)} CeCo del alcance.</small></span></button><p class="export-hint">Los archivos conservan esta consulta. Avance = suma real ÷ suma objetivo. El objetivo diario es un número de donativos.</p>`);
+  let exporting=false;
+  const setExporting=value=>{exporting=value;for(const id of ['export-xlsx','export-pdf','export-pdf-detail'])$(id).disabled=value;};
+  $('export-xlsx').addEventListener('click',()=>{
+    if(exporting)return;
+    try{downloadXLSX(snapshot.rows,snapshot.total,snapshot.data,snapshot.state,snapshot.context,snapshot.stores);$('modal').close();toast('Excel descargado con el alcance y periodo de esta consulta.');}
+    catch(error){toast(error.message||'No se pudo preparar el Excel. Vuelve a intentar.');}
+  });
+  for(const [id,mode] of [['export-pdf','summary'],['export-pdf-detail','detail']])$(id).addEventListener('click',async()=>{
+    if(exporting)return;setExporting(true);toast('Preparando el PDF de esta consulta…');
+    try{await downloadPDF(snapshot.rows,snapshot.total,snapshot.data,snapshot.state,snapshot.context,snapshot.stores,mode);$('modal').close();toast(mode==='detail'?'PDF descargado con todas las tiendas.':'Resumen PDF descargado.');}
+    catch(error){toast(error.message||'No se pudo preparar el PDF. Actualiza el sitio y vuelve a intentar.');}
+    finally{setExporting(false);}
+  });
 });
 $('copy-link').addEventListener('click',async()=>{ try { syncURL();await navigator.clipboard.writeText(location.href);toast('Enlace de esta consulta copiado.'); } catch { showModal('Enlace de esta consulta',`<p>Copia el enlace del campo.</p><label>Enlace<input class="copy-url" type="text" readonly value="${e(location.href)}"></label>`);$('modal-body').querySelector('input').select(); }});
 $('refresh').addEventListener('click',()=>loadData(false));

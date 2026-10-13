@@ -56,15 +56,27 @@ Una tienda con recaudación y meta ausente mantiene sus pesos visibles. El alcan
 
 ## Asignaciones y diferencias del origen
 
-Región y DM se toman del directorio operativo del proyecto Esfuerzo Operativo. Se aplica la misma asignación a la meta y al real. El nombre y el estado de la tienda provienen del Excel de objetivos. Las regiones distintas entre ambas fuentes se documentan en la auditoría.
+La región financiera se toma del Excel de objetivos de VaXCuenta. Se aplica a las metas y al real de la misma tienda para que los objetivos regionales coincidan con el archivo. El directorio operativo del proyecto Esfuerzo Operativo aporta el DM; su región se conserva en `directoryRegion` como referencia de auditoría. El nombre y el estado provienen del Excel de objetivos.
 
-Si falta una tienda en el directorio, su región se toma del Excel y su DM se muestra como **DM pendiente de asignación**. Los totales se conservan y ese grupo participa en la vista DM. Si también falta región, se identifica como **Por asignar**.
+Si falta una tienda en el directorio, mantiene la región de sus metas y su DM se muestra como **DM pendiente de asignación**. Una tienda con real y sin metas usa la región del directorio como complemento, conserva su recaudación y se marca con meta incompleta. Si también falta región, se identifica como **Por asignar**.
+
+Ejemplo auditado: Centro Norte, semana 40, contiene **71 CeCo y $130,820 de objetivo**. El directorio clasifica Atana Lindavista (43194) en Centro Norte, pero sus metas la asignan a Centro Poniente. Usar la región del directorio agregaba una tienda y $1,660 al objetivo de Centro Norte. La asignación financiera original se conserva y se documenta la diferencia.
 
 La tienda Miguel Aleman MTY no tiene un CeCo válido en el Excel: no se le atribuye la recaudación de otra tienda. Sus metas se conservan como pendientes en la auditoría.
 
 ## Exportación
 
-CSV y vista de impresión utilizan el mismo alcance, periodo, búsqueda y agrupación de la pantalla. Exportan todas las filas de esa consulta y sus totales. El CSV incluye importes y objetivo diario numéricos, sin convertir el número diario en moneda. La opción PDF abre la vista horizontal de impresión para elegir **Guardar como PDF** en el navegador.
+Se conserva el alcance, periodo y búsqueda al abrir Exportar. La búsqueda pendiente se aplica antes de tomar la consulta. El resumen monetario se comprueba contra todas las tiendas y las filas originales del mismo periodo; una inconsistencia bloquea la descarga y muestra su causa.
+
+**Resumen PDF** agrupa las mismas tiendas por Región en el alcance nacional y por DM cuando se elige una Región. Una tienda individual se identifica por CeCo y nombre. El resumen muestra real, objetivo, avance, faltante, cobertura de registros y reglas del periodo. El **PDF con todas las tiendas** añade la lista completa de CeCo; las filas no se recortan para resumir.
+
+**Excel** abre en Resumen. Tiendas calcula el real desde Real diario y el objetivo desde Metas mediante CeCo. Metas conserva el importe semanal y la proyección diaria del Excel original, y calcula la meta del periodo con los días aplicables. La semana 40 utiliza siete días de objetivo aunque sólo haya cuatro días de campaña; una semana posterior parcial usa sus días calendario al corte. Se redondea por tienda al centavo.
+
+La hoja Validación observa esas fuentes y cálculos: compara el real y las metas con el corte original, comprueba la conciliación del detalle, cuenta tiendas y filas, e identifica faltas de registro o meta. Sus resultados son terminales: no determinan importes ni alimentan la proyección. Modificar una fuente dentro del Excel actualiza los importes y cambia a REVISAR el control contra el corte original.
+
+Importes, porcentajes, fechas y donativos diarios se exportan como valores tipados. La proyección diaria se conserva como número independiente. Las fuentes de cada hoja se identifican por su nombre original. Los nombres se escriben como texto, evitando fórmulas ejecutables introducidas por una cadena.
+
+Semana 40 y acumulado son vistas distintas. En Centro Norte, la semana 40 suma **$58,420 reales / $130,820 de meta = 44.7%**, con **$72,400 de faltante**. El acumulado del 1 al 11 de octubre suma **$188,190 / $255,640 = 73.6%**, con **$67,450 de faltante**. Jinetes (38661) no tiene registro en semana 40 y conserva su objetivo de $1,510.
 
 ## Uso sin conexión
 
