@@ -10,51 +10,15 @@
   "objectiveRows": 8778,
   "targetStores": 976,
   "actualStores": 947,
-  "directoryDuplicateKeysCollapsed": [
-    "43194",
-    "43195",
-    "43198",
-    "43204",
-    "43205",
-    "43209",
-    "43215",
-    "43219",
-    "43220",
-    "43223",
-    "43240",
-    "43252",
-    "43256"
-  ],
+  "directoryDuplicateKeysCollapsed": [],
   "directoryConflicts": [],
-  "missingDm": [
-    "43065",
-    "43196",
-    "43199",
-    "43206",
-    "43214",
-    "43248",
-    "43251",
-    "43260",
-    "43261"
-  ],
+  "missingDm": [],
   "regionChanges": [],
   "assignmentSource": "data/Directorio.xlsx",
-  "directoryStores": 969,
-  "missingDirectory": [
-    "43065",
-    "43196",
-    "43199",
-    "43206",
-    "43214",
-    "43248",
-    "43251",
-    "43260",
-    "43261"
-  ],
+  "directoryStores": 993,
+  "missingDirectory": [],
   "incompleteDirectory": [],
-  "directoryStatusConflicts": [
-    "43256"
-  ],
+  "directoryStatusConflicts": [],
   "nameChanges": [
     {
       "ceco": "43052",
@@ -65,6 +29,11 @@
       "ceco": "43058",
       "targetName": "Colon Casa de Gobierno",
       "directoryName": "Casa de Gobierno DT"
+    },
+    {
+      "ceco": "43065",
+      "targetName": "Uruapan La Quinta Dt Ap.",
+      "directoryName": "Uruapan La Quinta DT"
     },
     {
       "ceco": "43103",
@@ -122,9 +91,19 @@
       "directoryName": "Multiparque Norte DT"
     },
     {
+      "ceco": "43196",
+      "targetName": "Estacion Gasco DT Ap.",
+      "directoryName": "Estación Gasco DT"
+    },
+    {
       "ceco": "43198",
       "targetName": "Carretera 57 SLP-Qro Santa Maria DT",
       "directoryName": "Starbucks Carretera 57 SLP-Qro Santa Maria DT"
+    },
+    {
+      "ceco": "43199",
+      "targetName": "Condado Queretaro DT",
+      "directoryName": "El Condado Qro"
     },
     {
       "ceco": "43204",
@@ -137,6 +116,16 @@
       "directoryName": "Xcanatun DT"
     },
     {
+      "ceco": "43206",
+      "targetName": "Albora DT Ap.",
+      "directoryName": "Albora DT"
+    },
+    {
+      "ceco": "43214",
+      "targetName": "Plaza Celta DT",
+      "directoryName": "Plaza Celta"
+    },
+    {
       "ceco": "43215",
       "targetName": "Plaza Laureles DT Ap.",
       "directoryName": "Plaza Laureles León DT"
@@ -147,9 +136,24 @@
       "directoryName": "Chapultepec SLP DT"
     },
     {
+      "ceco": "43251",
+      "targetName": "Galerías Blvd TUX",
+      "directoryName": "Galerías Blvd Tuxtla"
+    },
+    {
       "ceco": "43252",
       "targetName": "Zentralia Colima",
       "directoryName": "Zentralia"
+    },
+    {
+      "ceco": "43260",
+      "targetName": "Luzía",
+      "directoryName": "Luzia"
+    },
+    {
+      "ceco": "43261",
+      "targetName": "Encuentro Tlalnepantla",
+      "directoryName": "Encuentro Tlanepantla"
     }
   ],
   "objectiveCents": 1635357000,
@@ -207,13 +211,10 @@
   "sourceHashes": {
     "Va X Cuenta.csv": "b818ad75c7c1ea59af160c7ae5c2e259d6b0158ae1fca149bf6e0b8cd17155d4",
     "VaxCuenta Objetivos 26.xlsx": "c75c363ea6dec916e3824f9daba7bc6dc078aff08af9dbe7f84d56ae2e4e3dd6",
-    "Directorio.xlsx": "58ad9cf30ff57a86d2103aaf8ed3a5fd926c01e59500c88e0a759f189781566a",
+    "Directorio.xlsx": "814d55081051710828ee87eee979d0db710815a9b5c7215d8585c2e3e44befa6",
     "config.json": "107683faba31e488347fa5ab0e8924e6f0491449b51eb82965633e3b06b9817f"
   },
   "warnings": [
-    "9 tiendas sin DM confirmado; sus importes se conservan en Región y Tienda y en el grupo DM pendiente de asignación.",
-    "9 tiendas con meta o real no aparecen en Directorio.xlsx; conservan sus importes en Por asignar hasta confirmar su región y DM.",
-    "1 CeCo tienen estatus distintos en filas del directorio; se muestran como Por confirmar. Esto no excluye ni duplica sus importes.",
     "Falta el objetivo de la semana 49 (30 de noviembre). No se extrapola ni se presenta una meta total de campaña completa.",
     "14 importes no son múltiplos de $10; se preservan. Recaudado / $10 expresa donativos equivalentes, no tickets comprobados."
   ]
