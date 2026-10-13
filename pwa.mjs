@@ -15,7 +15,22 @@ export function setupPWA({showModal, toast, refresh}) {
   updateConnection();
   if ('serviceWorker' in navigator && window.isSecureContext) {
     navigator.serviceWorker.register(new URL('./sw.js', import.meta.url), {scope: './', updateViaCache: 'none'}).then(registration => {
-      const announce = () => { if (registration.waiting) { toast('Hay una nueva versión. Vuelve a abrir la app para usarla.'); } };
+      const updateButton = document.querySelector('#update-app');
+      let applyingUpdate = false;
+      const announce = () => {
+        const pending = Boolean(registration.waiting && navigator.serviceWorker.controller);
+        updateButton.hidden = !pending;
+        if (pending) toast('Hay una nueva versión. Selecciona Usar versión nueva cuando termines tu consulta.');
+      };
+      updateButton.addEventListener('click', () => {
+        if (!registration.waiting || applyingUpdate) return;
+        applyingUpdate = true;
+        updateButton.disabled = true;
+        registration.waiting.postMessage({type: 'APPLY_UPDATE'});
+      });
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (applyingUpdate) window.location.reload();
+      });
       registration.addEventListener('updatefound', () => { registration.installing?.addEventListener('statechange', announce); });
       announce();
       document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && navigator.onLine) { registration.update().catch(() => {}); refresh(true); } });

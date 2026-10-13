@@ -57,6 +57,10 @@ test('initial load, scopes, drilling, search, refresh failure and install help w
   element('modal-close').fire('click');
   element('reset').fire('click');const before=element('kpis').innerHTML;fail=true;await element('refresh').fire('click');assert.equal(element('kpis').innerHTML,before);
   assert.match(element('toast').textContent,/Conservamos el corte/);
+  element('about-nav').fire('click');assert.equal(element('about-page').hidden,false);assert.equal(element('dashboard-page').hidden,true);
+  element('about-return').fire('click');assert.equal(element('dashboard-page').hidden,false);assert.equal(element('about-page').hidden,true);
+  element('review-source').fire('click');assert.equal(element('source-validation').open,true);
+  assert.match(element('comparison-reading').textContent,/proyectados al corte/);
   element('help').fire('click');assert.match(element('modal-body').innerHTML,/participación real en tickets/);
   element('install').fire('click');assert.match(element('modal-body').innerHTML,/Safari/);
   element('modal-close').fire('click');

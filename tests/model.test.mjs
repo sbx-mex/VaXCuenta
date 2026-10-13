@@ -34,10 +34,10 @@ test('región, DM and tienda give the same financial totals',()=>{
     const groups=groupRows(rows,view);assert.equal(groups.reduce((sum,r)=>sum+r.realCents,0),total.realCents);assert.equal(groups.reduce((sum,r)=>sum+r.targetCents,0),total.targetCents);
   }
 });
-test('regional results retain the goal workbook region while directory supplies DM',()=>{
-  const row=metricForStore(prepared,'43194');assert.equal(row.region,'Centro Poniente');assert.equal(row.targetRegion,'Centro Poniente');assert.equal(row.directoryRegion,'Centro Norte');
-  assert.ok(!selectStores(prepared,{region:'Centro Norte'}).some(r=>r.ceco==='43194'));
-  assert.ok(selectStores(prepared,{region:'Centro Poniente'}).some(r=>r.ceco==='43194'));
+test('regional results follow the directory and retain the original region for audit',()=>{
+  const row=metricForStore(prepared,'43194');assert.equal(row.region,'Centro Norte');assert.equal(row.targetRegion,'Centro Poniente');assert.equal(row.directoryRegion,'Centro Norte');
+  assert.ok(selectStores(prepared,{region:'Centro Norte'}).some(r=>r.ceco==='43194'));
+  assert.ok(!selectStores(prepared,{region:'Centro Poniente'}).some(r=>r.ceco==='43194'));
 });
 test('missing DM shops are retained once and have an explicit group',()=>{
   const rows=selectStores(prepared), pending=groupRows(rows,'dm').find(r=>r.id===PENDING_DM);
@@ -113,4 +113,22 @@ test('PDF print document includes exactly the scoped rows and cutoff',()=>{
 test('report escapes text and does not execute spreadsheet strings as markup',()=>{
   const html=printHTML([{...metricForStore(prepared,'38101'),name:'<script>bad()</script>'}],aggregate(selectStores(prepared,{store:'38101'})),data,{view:'store',period:'all'},{baseURL:'https://example.test/VaXCuenta/',title:'<img onerror="bad()">',meta:'',periodNote:'',dailyNote:''});
   assert.ok(html.includes('&lt;script&gt;bad()&lt;/script&gt;'));assert.ok(!html.includes('<img onerror='));
+});
+
+test('duplicate compiled stores or real dates cannot inflate the report',()=>{
+  const stores=structuredClone(data);stores.stores.push(stores.stores[0]);assert.throws(()=>prepare(stores),/Tiendas duplicadas/);
+  const actuals=structuredClone(data);actuals.actuals.push(actuals.actuals[0]);assert.throws(()=>prepare(actuals),/Real duplicado/);
+});
+test('invalid compiled dates and non-integer cents are rejected before rendering',()=>{
+  for(const value of [NaN,Infinity,100.5]){const changed=structuredClone(data);changed.actuals[0][2]=value;assert.throws(()=>prepare(changed),/Real inválido/);}
+  const date=structuredClone(data);date.actuals[0][1]='2026-10-32';assert.throws(()=>prepare(date),/Real inválido/);
+  const target=structuredClone(data);target.targets[0][2]+=1000;assert.throws(()=>prepare(target),/no concilia/);
+});
+test('reordered real records still identify the latest date and daily detail correctly',()=>{
+  const changed=structuredClone(data);changed.actuals.reverse();const row=metricForStore(prepare(changed),'38101');
+  assert.equal(row.latestDay,'2026-10-11');assert.equal(row.realCents,207000);
+});
+test('real before the first available target marks cumulative comparison incomplete',()=>{
+  const changed=structuredClone(data);changed.targets=changed.targets.filter(row=>!(row[0]==='38101'&&row[1]===40));
+  const row=metricForStore(prepare(changed),'38101');assert.equal(row.realCents,207000);assert.equal(row.targetCents,161000);assert.equal(row.missingTargets,1);assert.equal(row.completion,null);
 });

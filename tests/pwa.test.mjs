@@ -5,15 +5,16 @@ import vm from 'node:vm';
 
 const sw=await readFile(new URL('../sw.js',import.meta.url),'utf8');
 function environment(online=true){
+  let skipped=0;
   const listeners={},store=new Map(),deleted=[],cache={
     addAll:async urls=>urls.forEach(url=>store.set(url,new Response(url))),
     match:async request=>store.get(typeof request==='string'?request:request.url)?.clone(),
     put:async(request,response)=>store.set(typeof request==='string'?request:request.url,response),
   };
-  const context={self:{registration:{scope:'https://sbx-mex.github.io/VaXCuenta/'},clients:{claim:async()=>{}},addEventListener:(type,fn)=>listeners[type]=fn},URL,Headers,Response,
+  const context={self:{registration:{scope:'https://sbx-mex.github.io/VaXCuenta/'},clients:{claim:async()=>{}},skipWaiting:async()=>{skipped++;},addEventListener:(type,fn)=>listeners[type]=fn},URL,Headers,Response,
     caches:{open:async()=>cache,keys:async()=>['vaxcuenta-/OtherApp/-old','vaxcuenta-/VaXCuenta/-old'],delete:async key=>deleted.push(key)},
     fetch:async request=>{if(!online)throw new Error('offline');return new Response('{"cutoff":"2026-10-11"}',{headers:{'Content-Type':'application/json'}})}};
-  vm.runInNewContext(sw,context);return {listeners,store,deleted};
+  vm.runInNewContext(sw,context);return {listeners,store,deleted,get skipped(){return skipped;}};
 }
 test('manifest start, scope and app id stay relative to a GitHub repository subpath',async()=>{
   const manifest=JSON.parse(await readFile(new URL('../manifest.webmanifest',import.meta.url)));
@@ -23,7 +24,7 @@ test('manifest start, scope and app id stay relative to a GitHub repository subp
 test('service worker precaches all assets within the project path',async()=>{
   const env=environment();let promise;env.listeners.install({waitUntil:p=>promise=p});await promise;
   assert.ok(env.store.has('https://sbx-mex.github.io/VaXCuenta/data/dashboard.json'));
-  for(const path of ['report.mjs','xlsx-export.mjs','pdf-export.mjs','vendor/pdf-lib.min.js','vendor/pdf-fonts.mjs'])assert.ok(env.store.has('https://sbx-mex.github.io/VaXCuenta/'+path));
+  for(const path of ['assets/enrique-cesar.jpeg','assets/jorge-alcantar.jpeg','report.mjs','xlsx-export.mjs','pdf-export.mjs','vendor/pdf-lib.min.js','vendor/pdf-fonts.mjs'])assert.ok(env.store.has('https://sbx-mex.github.io/VaXCuenta/'+path));
   assert.ok([...env.store.keys()].every(key=>key.startsWith('https://sbx-mex.github.io/VaXCuenta/')));
 });
 test('service worker removes old versions of this project only',async()=>{
@@ -49,4 +50,9 @@ test('requests to another project or external origin are not intercepted',()=>{
   const env=environment();let intercepted=false;
   for(const url of ['https://sbx-mex.github.io/OtherApp/','https://other.test/VaXCuenta/'])env.listeners.fetch({request:{url,method:'GET'},respondWith:()=>intercepted=true});
   assert.equal(intercepted,false);
+});
+
+test('service worker activates a waiting version only on an explicit update message',async()=>{
+  const env=environment();let promise;env.listeners.message({data:{type:'OTHER'},waitUntil:p=>promise=p});assert.equal(env.skipped,0);
+  env.listeners.message({data:{type:'APPLY_UPDATE'},waitUntil:p=>promise=p});await promise;assert.equal(env.skipped,1);
 });

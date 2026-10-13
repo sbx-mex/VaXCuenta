@@ -14,7 +14,7 @@ La entrada pública es **index.html en raíz**, con verde Starbucks, naranja sut
 | `assets/` | Logotipo de campaña e iconos PWA. |
 | `data/Va X Cuenta.csv` | Recaudación original por CeCo y día. |
 | `data/VaxCuenta Objetivos 26.xlsx` | Metas originales por CeCo y semana. |
-| `data/Directorio.xlsx` | DM y región de referencia del directorio operativo. |
+| `data/Directorio.xlsx` | Nombre de tienda, región y DM vigentes. |
 | `data/dashboard.json` | Corte preparado por el importador. |
 | `scripts/sw.template.js` | Plantilla del Service Worker. El build genera `sw.js` con versión. |
 | `scripts/legacy-files.json` | Lista exacta de copias anteriores que puede retirar el workflow. |
@@ -36,7 +36,9 @@ Reemplaza el CSV acumulado desde el 1 de octubre; conserva sus encabezados y su 
 
 Las metas y la región/DM se unen por CeCo. La semana 40 conserva el objetivo semanal completo. En semanas posteriores en curso la meta monetaria se prorratea por días calendario hasta el corte. El dato diario del Excel se muestra como número independiente.
 
-La región financiera se conserva del **Excel de metas**; el directorio aporta el DM. Esto concilia Centro Norte en semana 40 con **71 tiendas y $130,820 de objetivo**. Atana Lindavista (43194), que el directorio ubica en Centro Norte, permanece en Centro Poniente según las metas. Las diferencias de asignación quedan documentadas.
+**Directorio.xlsx del propio repositorio es la fuente vigente de nombre, región y DM.** Metas y real se unen por CeCo y se agrupan juntos con esa asignación. Los importes originales no cambian. Una tienda ausente del directorio conserva sus importes en Por asignar y su DM queda pendiente. Se rechazan asignaciones contradictorias del mismo CeCo antes de escribir el corte.
+
+Centro Norte tiene ahora **72 tiendas** en semana 40: **$58,420 reales / $132,480 de objetivo = 44.1%**. Atana Lindavista (43194) está en Centro Norte. Los nombres y regiones originales de metas se conservan como referencia de auditoría; el reporte Excel muestra ambas regiones. **Acerca de** incluye el propósito de VaXCuenta y los perfiles de Enrique César Flores y Jorge Alcantar Aguiar.
 
 ## Exportar la consulta
 
@@ -76,3 +78,5 @@ La limpieza se ejecuta **antes del build**. Si ya existe un `dist/` recién gene
 - [GitHub Pages con workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
 
 Un despliegue convencional de GitHub Pages permite consultar las cifras sin inicio de sesión. Región, DM y Tienda son filtros de consulta. La primera visita guarda el corte para consulta sin conexión, siempre con su fecha visible.
+
+La app también rechaza datos compilados duplicados o inválidos antes de mostrarlos. Si el real precede a la primera meta disponible, señala la comparación como incompleta. Las siguientes versiones se aplican mediante **Usar versión nueva**, al terminar la consulta; los filtros se conservan en el enlace.

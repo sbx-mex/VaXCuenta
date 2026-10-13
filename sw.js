@@ -1,14 +1,17 @@
 /* VERSION is replaced by the build; each project path owns its own cache. */
-const VERSION = 'fcbd5176a145906b';
+const VERSION = '2cf266ea8b42e4a5';
 const BASE = new URL('./', self.registration.scope);
 const PREFIX = `vaxcuenta-${BASE.pathname}-`;
 const CACHE = PREFIX + VERSION;
 const SHELL = ['./','./index.html','./styles.css','./app.mjs','./model.mjs','./export.mjs','./pwa.mjs',
   './report.mjs','./xlsx-export.mjs','./pdf-export.mjs','./vendor/pdf-lib.min.js','./vendor/pdf-fonts.mjs',
-  './manifest.webmanifest','./assets/icon.svg','./assets/campaign-frame.png','./assets/icon-192.png',
+  './assets/enrique-cesar.jpeg','./assets/jorge-alcantar.jpeg','./manifest.webmanifest','./assets/icon.svg','./assets/campaign-frame.png','./assets/icon-192.png',
   './assets/icon-512.png','./assets/icon-maskable-512.png','./assets/apple-touch-icon.png','./data/dashboard.json'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL.map(path => new URL(path, BASE).href))));
+});
+self.addEventListener('message', event => {
+  if (event.data?.type === 'APPLY_UPDATE') event.waitUntil(self.skipWaiting());
 });
 self.addEventListener('activate', event => {
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith(PREFIX) && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));

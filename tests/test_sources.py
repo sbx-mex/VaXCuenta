@@ -109,6 +109,53 @@ class SourceTests(unittest.TestCase):
         self.assertEqual(directory["43194"]["dm"], "Vanessa Carreño Rios")
         self.assertEqual(directory["43256"]["region"], "Bajío")
 
+    def test_conflicting_directory_assignments_block_build_before_write(self):
+        before = (ROOT / 'data/dashboard.json').read_bytes()
+        with patch('build_data.read_directory', return_value=({}, ['38101'], ['38101'])):
+            with self.assertRaisesRegex(ValueError, 'Asignaciones distintas'):
+                build(ROOT)
+        self.assertEqual(before, (ROOT / 'data/dashboard.json').read_bytes())
+
+    def test_directory_conflicts_include_different_names_and_invalid_ceco(self):
+        header = ['CC', 'CC Nombre', 'Región', 'Estatus', 'DM']
+        rows = [header, [38101, 'Angel', 'Centro Centro', 'Abierta', 'DM A'],
+                [38101, 'Otra tienda', 'Centro Centro', 'Abierta', 'DM A']]
+        with patch('build_data.read_xlsx', return_value=rows):
+            _, conflicts, _ = read_directory(None)
+        self.assertEqual(conflicts, ['38101'])
+        with patch('build_data.read_xlsx', return_value=[header, ['pendiente', 'Angel', 'Centro Centro', 'Abierta', 'DM A']]):
+            with self.assertRaisesRegex(ValueError, 'CeCo inválido'):
+                read_directory(None)
+
+    def test_directory_status_disagreement_is_explicit_without_duplicating_store(self):
+        rows = [['CC', 'CC Nombre', 'Región', 'Estatus', 'DM'],
+                [43256, 'Zumpango', 'Bajío', 'Abierta', 'DM A'],
+                [43256, 'Zumpango', 'Bajío', 'Próxima Apertura', 'DM A']]
+        with patch('build_data.read_xlsx', return_value=rows):
+            directory, conflicts, duplicates = read_directory(None)
+        self.assertEqual(len(directory), 1)
+        self.assertEqual(conflicts, [])
+        self.assertEqual(duplicates, ['43256'])
+        self.assertEqual(directory['43256']['status'], 'Por confirmar')
+        self.assertTrue(directory['43256']['statusConflict'])
+
+    def test_next_directory_update_moves_real_and_goals_together(self):
+        import shutil
+        directory, conflicts, duplicates = read_directory(ROOT / 'data/Directorio.xlsx')
+        directory['38101'] = {**directory['38101'], 'name': 'Angel actualizado', 'region': 'Región nueva', 'dm': 'DM nuevo'}
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder); (root / 'data').mkdir()
+            shutil.copy2(ROOT / 'config.json', root / 'config.json')
+            for name in ('Directorio.xlsx', 'VaxCuenta Objetivos 26.xlsx', 'Va X Cuenta.csv'):
+                shutil.copy2(ROOT / 'data' / name, root / 'data' / name)
+            with patch('build_data.read_directory', return_value=(directory, conflicts, duplicates)):
+                public, audit = build(root)
+            store = next(s for s in public['stores'] if s['ceco'] == '38101')
+            self.assertEqual((store['name'], store['region'], store['dm']), ('Angel actualizado', 'Región nueva', 'DM nuevo'))
+            self.assertEqual(public['targets'], sorted(self.targets))
+            current = json.loads((ROOT / 'data/dashboard.json').read_text())
+            self.assertEqual(public['actuals'], current['actuals'])
+
     def test_every_campaign_real_ceco_is_preserved(self):
         public = json.loads((ROOT / "data/dashboard.json").read_text())
         campaign = [r for r in self.records if date(2026,10,1)<=r[1]<=date(2026,11,30)]

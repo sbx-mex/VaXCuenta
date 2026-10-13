@@ -8,16 +8,17 @@ function report(state={region:'Centro Norte',period:'40',view:'store'}){
   const stores=selectStores(prepared,state),total=aggregate(stores);
   return buildReport(groupRows(stores,state.view),total,data,state,{title:state.store||state.dm||state.region||'Nacional'},stores);
 }
-test('regional summary matches source money, dates, 71 stores and six DM',()=>{
+test('regional summary matches source money, dates, current directory stores and DM',()=>{
   const r=report(),ids=new Set(data.stores.filter(row=>row.region==='Centro Norte').map(row=>row.ceco));
   const goals=data.targets.filter(row=>ids.has(row[0])&&row[1]===40),actuals=data.actuals.filter(row=>ids.has(row[0])&&row[1]>='2026-10-01'&&row[1]<='2026-10-04');
   assert.equal(r.summaryRows.length,new Set(r.stores.map(row=>row.dm)).size);assert.equal(r.summaryView,'dm');
   assert.equal(r.actuals.length,actuals.length);assert.equal(r.total.realCents,actuals.reduce((sum,row)=>sum+row[2],0));assert.equal(r.total.targetCents,goals.reduce((sum,row)=>sum+row[2],0));
   assert.deepEqual(r.window,{from:'2026-10-01',to:'2026-10-04'});
   assert.equal(r.targets.length,goals.length);assert.ok(r.targets.every(row=>row.days===7));
-  if(data.stores.find(row=>row.ceco==='43194')?.region==='Centro Poniente'){
-    assert.match(r.warnings.join(' '),/43194.*Centro Poniente/);assert.ok(!r.stores.some(row=>row.ceco==='43194'));
-  }
+  assert.ok(r.stores.some(row=>row.ceco==='43194'));
+  const changes=r.stores.filter(row=>row.targetRegion!==row.directoryRegion&&row.directoryRegion);
+  if(changes.length)assert.match(r.warnings.join(' '),/cambio de región/);
+  assert.match(r.sourceNote,/Nombre, región y DM de Directorio/);
 });
 test('national, DM, store and search summaries conserve all scoped money',()=>{
   for(const state of [{view:'region',period:'all'},{view:'store',region:'Centro Norte',dm:'Nancy Carolina Rodriguez Medina',period:'40'},{view:'store',store:'38101',period:'all'},{view:'region',region:'Centro Norte',query:'Jinetes',period:'40'}]){
@@ -54,4 +55,12 @@ test('incomplete targets keep known totals and explicitly suppress interpretatio
   changed.targets=changed.targets.filter(row=>!(row[0]==='38101'&&row[1]===41));
   const stores=selectStores(prepare(changed),state),total=aggregate(stores),r=buildReport(stores,total,changed,state,{title:'Angel'},stores);
   assert.equal(r.total.completion,null);assert.match(r.interpretation,/meta está incompleta/);assert.match(r.warnings.join(' '),/meta incompleta/);
+});
+
+test('exports document directory reclassification while retaining original target amounts',()=>{
+  const changed=structuredClone(data),state={view:'store',store:'43194',period:'40'};
+  changed.stores.find(row=>row.ceco==='43194').targetRegion='Región anterior';
+  const stores=selectStores(prepare(changed),state),r=buildReport(stores,aggregate(stores),changed,state,{title:'Atana'},stores);
+  assert.equal(r.stores[0].region,'Centro Norte');assert.match(r.warnings.join(' '),/43194: Región anterior a Centro Norte/);
+  assert.equal(r.targets[0].weeklyCents,data.targets.find(row=>row[0]==='43194'&&row[1]===40)[2]);
 });

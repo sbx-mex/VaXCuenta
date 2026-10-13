@@ -35,17 +35,32 @@ export function targetAtCutoff(data, target, week, cutoff) {
 
 export function prepare(data) {
   if (data.schemaVersion !== 1 || !Array.isArray(data.actuals) || !Array.isArray(data.targets) || !Array.isArray(data.stores)) throw new Error('Los datos no tienen el formato de VaXCuenta.');
+  const validDate = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(dayNumber(value)) && dayISO(dayNumber(value)) === value;
+  if (!data.config?.campaign || !Array.isArray(data.calendar) || !data.calendar.length ||
+      !validDate(data.cutoff) || !validDate(data.config.campaign.start) || !validDate(data.config.campaign.end) ||
+      data.cutoff < data.config.campaign.start || data.cutoff > data.config.campaign.end ||
+      !Number.isFinite(data.config.campaign.donationPesos) || data.config.campaign.donationPesos <= 0) throw new Error('El calendario o el corte no son válidos.');
   const byStore = new Map(data.stores.map(store => [store.ceco, {store, targets: new Map(), actuals: []}]));
+  if (byStore.size !== data.stores.length || data.stores.some(store => !/^\d{5}$/.test(store.ceco))) throw new Error('Tiendas duplicadas o CeCo inválido.');
+  const weeks = new Set(data.calendar.map(week => week.week));
   for (const row of data.targets) {
     const entry = byStore.get(row[0]);
     if (!entry || entry.targets.has(row[1])) throw new Error('Metas duplicadas o tienda no identificada.');
+    if (!weeks.has(row[1]) || !Number.isSafeInteger(row[2]) || row[2] < 0 ||
+        !Number.isFinite(row[3]) || row[3] < 0 || !Number.isFinite(row[4]) || row[4] < 0 ||
+        Math.abs(row[3] * data.config.campaign.donationPesos * 100 - row[2]) > 1) throw new Error('Meta inválida o importe que no concilia con la proyección.');
     entry.targets.set(row[1], row);
   }
+  const actualKeys = new Set();
   for (const row of data.actuals) {
     const entry = byStore.get(row[0]);
-    if (!entry || row[1] < data.config.campaign.start || row[1] > data.cutoff) throw new Error('Real fuera de la campaña o del corte.');
+    if (!entry || !validDate(row[1]) || row[1] < data.config.campaign.start || row[1] > data.cutoff || !Number.isSafeInteger(row[2])) throw new Error('Real inválido o fuera de la campaña o del corte.');
+    const key = `${row[0]}/${row[1]}`;
+    if (actualKeys.has(key)) throw new Error('Real duplicado para el mismo CeCo y día.');
+    actualKeys.add(key);
     entry.actuals.push(row);
   }
+  for (const entry of byStore.values()) entry.actuals.sort((a, b) => a[1].localeCompare(b[1]));
   return {data, byStore, metrics: new Map()};
 }
 
@@ -59,7 +74,7 @@ export function metricForStore(prepared, ceco, period = 'all') {
   const selectedWeeks = data.calendar.filter(w => w.campaignStart <= window.to && w.campaignEnd >= window.from);
   const firstTarget = entry.targets.size ? Math.min(...entry.targets.keys()) : Infinity;
   const actuals = entry.actuals.filter(r => r[1] >= window.from && r[1] <= window.to);
-  const eligibleWeeks = selectedWeeks.filter(w => w.week >= firstTarget);
+  const eligibleWeeks = selectedWeeks.filter(w => w.week >= firstTarget || actuals.some(row => row[1] >= w.campaignStart && row[1] <= w.campaignEnd));
   const active = eligibleWeeks.length > 0 || actuals.length > 0;
   let targetCents = 0, fullTargetCents = 0, missingTargets = 0;
   for (const week of eligibleWeeks) {

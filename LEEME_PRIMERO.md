@@ -1,42 +1,50 @@
-# VaXCuenta: exportar, entender y validar
+# VaXCuenta: directorio vigente y consulta clara
 
-## Cargar esta mejora
+## Consultar la app
 
-1. Descomprime **VaXCuenta_Mejora_Exportaciones.zip**. Sube el **contenido interior de VaXCuenta/** a la raíz de **sbx-mex/VaXCuenta**, conservando las carpetas y reemplazando los archivos existentes. Guarda los cambios en **main**.
-2. Ejecuta **Actions → VaXCuenta - Validar, limpiar y publicar → Run workflow → main**. El workflow existente valida con Python y JavaScript, limpia las copias obsoletas verificadas y publica el tablero. Pages debe usar **GitHub Actions**.
-3. Abre **https://sbx-mex.github.io/VaXCuenta/** y actualiza con **Ctrl + F5**.
+1. Abre https://sbx-mex.github.io/VaXCuenta/.
+2. Elige Región, DM o Tienda y el periodo. Compara real y objetivo del mismo alcance.
+3. Usa Exportar para compartir el resumen PDF o revisar el detalle en Excel.
+4. Cuando aparezca **Usar versión nueva**, selecciónalo al terminar la consulta. Los filtros del enlace se conservan. Para adoptar esta primera mejora desde una versión anterior, cierra las otras ventanas de VaXCuenta y vuelve a abrirla.
 
-El ZIP contiene únicamente archivos nuevos o modificados del proyecto. Los archivos originales de recaudación, objetivos y directorio se conservan en el repositorio. No subas la carpeta exterior VaXCuenta como una subcarpeta adicional.
+## Actualizar las fuentes
 
-## Exportar en tres opciones
+Reemplaza los archivos en data/ conservando nombres y encabezados: **Directorio.xlsx**, **VaxCuenta Objetivos 26.xlsx** y **Va X Cuenta.csv**. El CSV debe conservar el acumulado desde el inicio de campaña. Guarda los cambios en main y revisa **Actions → VaXCuenta - Validar, limpiar y publicar**. El workflow valida y publica; Pages debe usar **GitHub Actions**.
 
-| Opción | Para qué sirve |
+Nombre de tienda, región y DM siguen el Directorio.xlsx del propio repositorio. Objetivos y real se unen por CeCo, sin cambiar sus importes. Las asignaciones contradictorias bloquean una carga; las tiendas ausentes conservan sus importes en Por asignar.
+
+## Qué cambia
+
+- **Directorio.xlsx manda:** nombre, región y DM se actualizan por CeCo. Real y metas se agrupan juntos. Si falta una tienda, sus importes permanecen en Por asignar.
+- **Lectura en tres pasos:** elige tu alcance, compara real y proyección, exporta y valida. Una frase explica cuánto se proyectó, cuánto se recaudó y cuánto falta.
+- **Exportación con vista previa:** confirma periodo, corte, tiendas e importes antes de descargar. Conserva filtros y búsqueda.
+- **Validación en pantalla:** se rechazan CeCo o días duplicados, importes inválidos y metas que no concilian. Un real previo a la primera meta disponible marca la comparación incompleta.
+- **Actualizar la app:** el botón Usar versión nueva aplica la actualización al seleccionarlo y conserva los filtros del enlace.
+- **Acerca de:** propósito de VaXCuenta, fotografías de Enrique César Flores y Jorge Alcantar Aguiar y un mensaje de acompañamiento a los equipos.
+
+## Exportar y validar
+
+| Descarga | Uso |
 | --- | --- |
-| **Descargar resumen PDF** | Lectura rápida: real, objetivo, avance, faltante y datos por revisar. Centro Norte, semana 40, se resume en una página con sus seis DM. |
-| **Descargar Excel para validar** | Empieza en Resumen y comprueba los controles en Validación. Tiendas, Real diario y Metas permiten rastrear cada importe por CeCo. |
-| **Descargar PDF con todas las tiendas** | Incluye el resumen y después todos los CeCo del alcance, con páginas numeradas. |
+| Resumen PDF | Comparte indicadores, avance, cobertura y notas del periodo. |
+| Excel para validar | Resumen, Validación, Tiendas, Real diario y Metas. Región vigente y original de metas para contrastar asignaciones. |
+| PDF con todas las tiendas | Resumen más todos los CeCo seleccionados. |
 
-Antes de descargar verás el alcance, periodo, corte, importes y número de tiendas. Los archivos conservan esa consulta aunque después cambies los filtros. La búsqueda también se aplica al reporte.
+En Excel empieza por **Resumen**. En **Validación**, las ocho diferencias deben ser 0 y el resultado OK. En **Tiendas**, consulta el CeCo: las columnas finales muestran región original de metas, fuente de asignación y estatus del directorio. **Real diario** y **Metas** permiten rastrear los importes originales.
 
-## Validar en tres pasos
+## Ejemplo con el directorio actual
 
-1. En **Resumen**, confirma región, periodo, fecha del archivo y número de tiendas.
-2. En **Validación**, las ocho diferencias deben ser **0** y el resultado **OK**. Un OK confirma que los importes concilian; los avisos de falta de registro o meta requieren revisar el origen.
-3. En **Tiendas**, identifica el CeCo que deseas comprobar. **Real diario** conserva sus filas e importes originales; **Metas** muestra la meta semanal, los días de objetivo y el importe aplicado al periodo. Si modificas los datos dentro de Excel, las fórmulas y los controles se actualizan.
-
-## Ejemplo de control: Centro Norte
-
-| Periodo | Tiendas | Real MXN | Objetivo MXN | Avance | Faltante MXN |
+| Centro Norte | Tiendas | Real MXN | Objetivo MXN | Avance | Faltante MXN |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Semana 40: 1–4 octubre | 71 | $58,420 | $130,820 | 44.7% | $72,400 |
-| Acumulado: 1–11 octubre | 71 | $188,190 | $255,640 | 73.6% | $67,450 |
+| Semana 40: 1–4 octubre | 72 | $58,420 | $132,480 | 44.1% | $74,060 |
+| Acumulado: 1–11 octubre | 72 | $188,780 | $258,960 | 72.9% | $70,180 |
 
-**El archivo tiene información al 11 de octubre de 2026; la semana 40 sólo incluye real del 1 al 4 de octubre.** Se mantiene el objetivo semanal completo.
+El corte real del archivo es **11 de octubre de 2026**. La fecha de publicación no adelanta ese corte.
 
-La región se toma del Excel de metas y el DM del directorio. Atana Lindavista (43194) pertenece a Centro Poniente según sus metas y no se agrega a Centro Norte. Jinetes (38661) no tiene registro de semana 40; conserva su meta de $1,510.
+## Validación
 
-## Validación de la entrega
+**103 pruebas aprobadas: 45 Python y 58 JavaScript.** Se concilian los importes y todos los CeCo con las fuentes, se comprueban futuras actualizaciones del directorio, duplicados, filtros, exportaciones y caché PWA. CSV y Excel originales conservan sus bytes.
 
-**89 pruebas aprobadas: 39 Python y 50 JavaScript.** Excel y PDF se comprobaron con lectores independientes; se revisó el recálculo y la presentación de las cinco hojas. El flujo completo se ensayó con los archivos de la versión actual de GitHub y un repositorio local de prueba.
+Hay **9 CeCo con meta o real que faltan en el directorio** y **1 CeCo con estatus de apertura contradictorio**. Se muestran pendientes y se conservan sus importes. También se mantienen las notas de fuentes sobre semana 49 y CeCo sin clave de metas. Consulta docs/AUDITORIA.md y docs/audit.json.
 
-La ejecución verde y publicación en GitHub se confirman después de cargar los archivos y ejecutar el workflow en el nuevo commit.
+GitHub Actions valida el PR antes de integrarlo. Después del merge, main ejecuta la validación y publicación de la app. La fecha de publicación no cambia el corte real del CSV.

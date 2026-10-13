@@ -38,6 +38,121 @@
     "43261"
   ],
   "regionChanges": [],
+  "assignmentSource": "data/Directorio.xlsx",
+  "directoryStores": 969,
+  "missingDirectory": [
+    "43065",
+    "43196",
+    "43199",
+    "43206",
+    "43214",
+    "43248",
+    "43251",
+    "43260",
+    "43261"
+  ],
+  "incompleteDirectory": [],
+  "directoryStatusConflicts": [
+    "43256"
+  ],
+  "nameChanges": [
+    {
+      "ceco": "43052",
+      "targetName": "Las Cuatas Gdl DT",
+      "directoryName": "Las Cuatas"
+    },
+    {
+      "ceco": "43058",
+      "targetName": "Colon Casa de Gobierno",
+      "directoryName": "Casa de Gobierno DT"
+    },
+    {
+      "ceco": "43103",
+      "targetName": "Estacion Poblanita DT",
+      "directoryName": "Estación poblanita DT"
+    },
+    {
+      "ceco": "43113",
+      "targetName": "Parques Guadalajara (recorte)",
+      "directoryName": "Parques Gdl"
+    },
+    {
+      "ceco": "43159",
+      "targetName": "Hospital Angeles Pedregal II",
+      "directoryName": "Hospital Angeles del Pedregal II"
+    },
+    {
+      "ceco": "43161",
+      "targetName": "Alameda La Paz DT-0",
+      "directoryName": "Alameda La Paz DT"
+    },
+    {
+      "ceco": "43164",
+      "targetName": "Blvd Ojo de Agua",
+      "directoryName": "Blvd Ojo de Agua DT"
+    },
+    {
+      "ceco": "43177",
+      "targetName": "Anahuac",
+      "directoryName": "Anahuac DT"
+    },
+    {
+      "ceco": "43179",
+      "targetName": "Peninsula Monterrey",
+      "directoryName": "Península Monterrey"
+    },
+    {
+      "ceco": "43182",
+      "targetName": "SID Santa Catarina",
+      "directoryName": "Santa Catarina SID"
+    },
+    {
+      "ceco": "43186",
+      "targetName": "Periferico Sur Merida DT Ap.",
+      "directoryName": "Periferico Sur Mérida"
+    },
+    {
+      "ceco": "43188",
+      "targetName": "Insurgentes Tehuantepec DT",
+      "directoryName": "Insurgentes Tehuantepec"
+    },
+    {
+      "ceco": "43191",
+      "targetName": "Multiparque Norte",
+      "directoryName": "Multiparque Norte DT"
+    },
+    {
+      "ceco": "43198",
+      "targetName": "Carretera 57 SLP-Qro Santa Maria DT",
+      "directoryName": "Starbucks Carretera 57 SLP-Qro Santa Maria DT"
+    },
+    {
+      "ceco": "43204",
+      "targetName": "Paseo 2000",
+      "directoryName": "Plaza Paseo 2000"
+    },
+    {
+      "ceco": "43205",
+      "targetName": "Xcanatun DT Ap.",
+      "directoryName": "Xcanatun DT"
+    },
+    {
+      "ceco": "43215",
+      "targetName": "Plaza Laureles DT Ap.",
+      "directoryName": "Plaza Laureles León DT"
+    },
+    {
+      "ceco": "43219",
+      "targetName": "Av. Chapultepec SLP DT",
+      "directoryName": "Chapultepec SLP DT"
+    },
+    {
+      "ceco": "43252",
+      "targetName": "Zentralia Colima",
+      "directoryName": "Zentralia"
+    }
+  ],
+  "objectiveCents": 1635357000,
   "missingCampaignWeeks": [
     49
   ],
@@ -95,10 +210,12 @@
     "Va X Cuenta.csv": "aea40461fdc6a0dbb6b57c483f1956e5affa1ff8506b7e2a4d4a4f5ca616951d",
     "VaxCuenta Objetivos 26.xlsx": "c75c363ea6dec916e3824f9daba7bc6dc078aff08af9dbe7f84d56ae2e4e3dd6",
     "Directorio.xlsx": "58ad9cf30ff57a86d2103aaf8ed3a5fd926c01e59500c88e0a759f189781566a",
-    "config.json": "24d9ee127da61ba349586f95c3bbd79288002c2f78ebb61575f1d1346bf59079"
+    "config.json": "107683faba31e488347fa5ab0e8924e6f0491449b51eb82965633e3b06b9817f"
   },
   "warnings": [
     "9 tiendas sin DM confirmado; sus importes se conservan en Región y Tienda y en el grupo DM pendiente de asignación.",
+    "9 tiendas con meta o real no aparecen en Directorio.xlsx; conservan sus importes en Por asignar hasta confirmar su región y DM.",
+    "1 CeCo tienen estatus distintos en filas del directorio; se muestran como Por confirmar. Esto no excluye ni duplica sus importes.",
     "Falta el objetivo de la semana 49 (30 de noviembre). No se extrapola ni se presenta una meta total de campaña completa.",
     "14 importes no son múltiplos de $10; se preservan. Recaudado / $10 expresa donativos equivalentes, no tickets comprobados."
   ]

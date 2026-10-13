@@ -15,6 +15,8 @@ Información real al **2026-10-11**.
 ## Notas del origen
 
 - 9 tiendas sin DM confirmado; sus importes se conservan en Región y Tienda y en el grupo DM pendiente de asignación.
+- 9 tiendas con meta o real no aparecen en Directorio.xlsx; conservan sus importes en Por asignar hasta confirmar su región y DM.
+- 1 CeCo tienen estatus distintos en filas del directorio; se muestran como Por confirmar. Esto no excluye ni duplica sus importes.
 - Falta el objetivo de la semana 49 (30 de noviembre). No se extrapola ni se presenta una meta total de campaña completa.
 - 14 importes no son múltiplos de $10; se preservan. Recaudado / $10 expresa donativos equivalentes, no tickets comprobados.
 
@@ -25,7 +27,6 @@ Información real al **2026-10-11**.
 ## Procedencia
 
 Recaudación y metas: archivos adjuntos originales, conservados en data/.
-Región financiera: VaxCuenta Objetivos 26.xlsx, vinculada por CeCo.
-DM y región de referencia: https://github.com/sbx-mex/Esfuerzo_Operativo/blob/main/data/Directorio.xlsx
-Blob GitHub del directorio: 016a92992def31e7b5a45c1b82eaf355948a1909.
+Nombre, región y DM vigentes: data/Directorio.xlsx del propio repositorio.
+Objetivos: VaxCuenta Objetivos 26.xlsx, vinculados por CeCo y semana; los importes se conservan.
 Los hashes SHA-256 y el detalle de incidencias están en audit.json.
