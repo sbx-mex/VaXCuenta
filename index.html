@@ -23,7 +23,7 @@
   <main id="dashboard" class="shell">
     <div id="dashboard-page">
     <section class="hero" aria-labelledby="main-title">
-      <div class="hero-copy"><div class="eyebrow">RECAUDACIÓN · CAMPAÑA 2026</div><h1 id="main-title">Cada aportación <span>cuenta.</span></h1><p>Acompañemos a nuestros equipos: del 1 de octubre al 30 de noviembre.</p><div class="hero-tags"><span>Donativo de <b>$10</b></span><span>Objetivo basado en <b>7% de tickets proyectados</b></span></div></div>
+      <div class="hero-copy"><div class="eyebrow">RECAUDACIÓN · CAMPAÑA 2026</div><h1 id="main-title">Cada aportación <span>cuenta.</span></h1><p>1 octubre — 30 noviembre · Donativo $10</p></div>
       <div class="hero-brand"><svg viewBox="797 870 263 176" role="img" aria-label="Va por mi cuenta. Nadie más con hambre."><image href="./assets/campaign-frame.png" width="1080" height="1080"/></svg><div class="cutoff"><span class="cutoff-dot"></span><div><small>INFORMACIÓN REAL AL</small><strong id="cutoff">Cargando…</strong></div></div></div>
     </section>
     <section class="filter-panel" aria-label="Filtros de consulta">
@@ -38,40 +38,44 @@
     <div id="load-state" class="load-state" role="status">Validando la información de la campaña…</div>
     <section id="report" hidden aria-label="Real contra objetivo">
       <div class="scope-line"><div><h2 id="scope-title">Resumen nacional</h2><p id="scope-meta"></p></div><div class="report-actions"><button id="refresh" type="button" class="button quiet"><span aria-hidden="true">↻</span> Actualizar</button><button id="export" type="button" class="button solid">Exportar <span aria-hidden="true">↓</span></button></div></div>
-      <div class="reading-steps" aria-label="Cómo consultar"><span><b>1</b> Elige tu alcance</span><span><b>2</b> Mide el avance de campaña</span><span><b>3</b> Exporta y valida</span></div>
-      <section id="campaign-summary" class="campaign-summary" aria-label="Avance de toda la campaña"></section><p id="campaign-note" class="campaign-note" role="status" hidden></p>
+      <section id="campaign-summary" class="campaign-summary" aria-label="Avance de toda la campaña"></section>
       <div class="kpi-grid" id="kpis" aria-live="polite"></div>
-      <div class="comparison-reading"><p id="comparison-reading" aria-live="polite"></p><button id="review-source" type="button" class="text-button">Validar asignaciones</button></div>
-      <div id="period-note" class="period-note"></div>
       <div class="insights-grid">
-        <section class="panel weekly-panel"><div class="panel-heading"><div><h2>Real vs. objetivo proyectado</h2><p id="chart-subtitle">Recaudación por semana</p></div><div class="legend"><span><i class="real-dot"></i>Real</span><span><i class="target-dot"></i>Objetivo al corte</span></div></div><div id="weekly-chart"></div></section>
-        <aside class="panel daily-panel"><div class="eyebrow">HACIA EL CIERRE</div><h2>Cada día cuenta.</h2><strong id="daily-target" class="daily-number">—</strong><p>días de campaña después del corte</p><span id="daily-week" class="pill warm"></span><p class="daily-footnote">La fecha de cierre es el 30 de noviembre. El acumulado considera sólo las tiendas con objetivo.</p><div class="daily-rule"><span>Tiendas con registro</span><strong id="records-info"></strong></div></aside>
+        <section class="panel weekly-panel"><div class="panel-heading"><div><h2>Avance semanal</h2><p id="chart-subtitle">Recaudación por semana</p></div><div class="legend"><span><i class="real-dot"></i>Real</span><span><i class="target-dot"></i>Objetivo al corte</span></div></div><div id="weekly-chart"></div></section>
+        <aside class="panel daily-panel"><div class="eyebrow">HACIA EL CIERRE</div><h2>Cada día cuenta.</h2><strong id="daily-target" class="daily-number">—</strong><p>días restantes</p><span id="daily-week" class="pill warm"></span><div class="daily-rule"><span>Tiendas con registro</span><strong id="records-info"></strong></div></aside>
       </div>
       <section class="panel ranking" aria-labelledby="ranking-title">
         <div class="ranking-heading"><div><h2 id="ranking-title">Resultados por región</h2><p id="ranking-meta"></p></div><div class="view-tabs" role="group" aria-label="Agrupar resultados"><button type="button" data-view="region" aria-pressed="true">Región</button><button type="button" data-view="dm" aria-pressed="false">DM</button><button type="button" data-view="store" aria-pressed="false">Tienda</button></div></div>
         <div class="table-toolbar"><label class="search-field"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span class="sr-only">Buscar tienda, CeCo, región o DM</span><input id="search" type="search" placeholder="Buscar tienda, CeCo o DM" autocomplete="off"></label><label class="sort-field"><span>Ordenar</span><select id="sort"><option value="completion">Mayor avance</option><option value="lowest">Menor avance</option><option value="real">Mayor recaudación</option><option value="name">Nombre A–Z</option></select></label></div>
         <div id="empty-state" class="empty-state" hidden>No hay tiendas para estos filtros. Ajusta el alcance o limpia la búsqueda.</div>
-        <div class="table-wrap"><table id="results"><caption class="sr-only">Meta total, acumulado al corte y avance de campaña de los CeCo con objetivo</caption><thead><tr><th id="name-heading" scope="col">Región</th><th scope="col">Meta total cargada</th><th scope="col">Acumulado al corte</th><th scope="col">Avance campaña</th><th scope="col">Por recaudar</th><th scope="col">Avance del periodo</th><th scope="col"><span class="sr-only">Abrir detalle</span></th></tr></thead><tbody id="table-body"></tbody><tfoot id="table-total"></tfoot></table></div>
-        <div class="table-note"><span id="table-count"></span><span>Avance campaña = acumulado ÷ meta total cargada. Sólo CeCo con objetivo.</span></div>
+        <div class="table-wrap"><table id="results"><caption class="sr-only">Meta total, acumulado al corte y avance de campaña de los CeCo con objetivo</caption><thead><tr><th id="name-heading" scope="col">Región</th><th scope="col">Meta cargada</th><th scope="col">Acumulado</th><th scope="col">Avance</th><th scope="col">Por recaudar</th><th scope="col"><span class="sr-only">Abrir detalle</span></th></tr></thead><tbody id="table-body"></tbody><tfoot id="table-total"></tfoot></table></div>
+        <div class="table-note"><span id="table-count"></span></div>
       </section>
-      <details id="source-validation" class="source-notes"><summary>Validar directorio, datos y metas <span id="source-note-count"></span></summary><div id="source-notes-content"></div></details>
-      <details class="calendar-panel"><summary>Calendario de campaña y objetivos disponibles</summary><div id="campaign-calendar"></div></details>
+
     </section>
     </div>
     <section id="about-page" class="about-page" hidden aria-labelledby="about-title">
       <div class="eyebrow">LIDERAZGO Y CONEXIÓN</div>
       <h1 id="about-title" tabindex="-1">Acerca de VaXCuenta</h1>
-      <p class="about-intro">Un espacio para acompañar a nuestros equipos, reconocer cada aportación y entender juntos cómo vamos.</p>
-      <div class="about-purpose"><h2>Cada aportación nos acerca.</h2><p>VaXCuenta reúne la recaudación real y el objetivo proyectado de la campaña. Elige tu región, DM o tienda; compara el mismo periodo y comparte un reporte claro con tu equipo.</p><p>El directorio vigente guía las asignaciones. Los importes de cada tienda se conservan por CeCo para que puedas seguirlos desde el resumen hasta su origen.</p></div>
+      <p class="about-intro">Cada aportación nos acerca. Gracias por hacerlo posible.</p>
+      <div class="about-purpose"><h2>Una campaña, un mismo objetivo.</h2><p>Tiendas con meta positiva, vinculadas al directorio por CeCo.</p></div>
+      <section class="about-review" aria-labelledby="review-title">
+        <div class="review-heading"><div><div class="eyebrow">DATOS Y SEGUIMIENTO</div><h2 id="review-title">A revisar</h2><p id="review-cutoff"></p></div><button id="review-source" type="button" class="button quiet">Ver detalle</button></div>
+        <p id="comparison-reading" class="review-coverage"></p>
+        <p id="campaign-note" class="campaign-note" hidden></p>
+      <details id="source-validation" class="source-notes"><summary>Detalle de datos y pendientes <span id="source-note-count"></span></summary><div id="source-notes-content"></div></details>
+      <details class="calendar-panel"><summary>Calendario y metas del alcance elegido</summary><div id="campaign-calendar"></div></details>
+        <details class="source-notes"><summary>Cómo se calcula</summary><div><p>Meta cargada: objetivos disponibles de octubre y noviembre. Avance: acumulado al corte ÷ meta cargada. Las semanas faltantes se detallan arriba.</p><p>Sin registro indica que no hay una fila en el archivo; los importes reportados se conservan.</p><p>El 7% es la base de la proyección. El tablero no calcula participación real en tickets.</p><p id="period-note"></p></div></details>
+      </section>
       <div class="team-grid">
-        <article class="team-card"><a href="./assets/enrique-cesar.jpeg" target="_blank" rel="noopener" aria-label="Ampliar foto de Enrique César Flores"><img src="./assets/enrique-cesar.jpeg" width="1079" height="1397" alt="Enrique César Flores" loading="lazy"><span>Selecciona la foto para ampliarla ↗</span></a><p class="eyebrow">DISEÑO Y DESARROLLO</p><h2>Enrique César Flores</h2></article>
-        <article class="team-card"><a href="./assets/jorge-alcantar.jpeg" target="_blank" rel="noopener" aria-label="Ampliar foto de Jorge Alcantar Aguiar"><img src="./assets/jorge-alcantar.jpeg" width="1154" height="1363" alt="Jorge Alcantar Aguiar" loading="lazy"><span>Selecciona la foto para ampliarla ↗</span></a><p class="eyebrow">DISEÑO Y DESARROLLO</p><h2>Jorge Alcantar Aguiar</h2></article>
+        <article class="team-card"><button type="button" class="team-photo" data-photo="enrique" aria-label="Ampliar foto de Enrique César Flores"><img src="./assets/enrique-cesar.jpeg" width="1079" height="1397" alt="Enrique César Flores" loading="lazy"><span>Ampliar foto</span></button><p class="eyebrow">DISEÑO Y DESARROLLO</p><h2>Enrique César Flores</h2></article>
+        <article class="team-card"><button type="button" class="team-photo" data-photo="jorge" aria-label="Ampliar foto de Jorge Alcantar Aguiar"><img src="./assets/jorge-alcantar.jpeg" width="1154" height="1363" alt="Jorge Alcantar Aguiar" loading="lazy"><span>Ampliar foto</span></button><p class="eyebrow">DISEÑO Y DESARROLLO</p><h2>Jorge Alcantar Aguiar</h2></article>
       </div>
-      <div class="about-purpose about-thanks"><div class="eyebrow">SIGAMOS CONSTRUYENDO JUNTOS</div><h2>Gracias por hacer que cada aportación cuente.</h2><p>Usa la información para conversar con tu equipo, reconocer los avances y acordar el siguiente paso. Si encuentras una diferencia, revisa el CeCo, la fecha y las fuentes en la exportación.</p><button id="about-return" class="button solid" type="button">Consultar el avance</button></div>
+      <div class="about-purpose about-thanks"><h2>Sigamos sumando juntos.</h2><button id="about-return" class="button solid" type="button">Consultar el avance</button></div>
     </section>
-    <footer class="footer"><span>VaXCuenta <b>·</b> Starbucks México</span><span id="footer-cutoff"></span><button type="button" id="copy-link" class="text-button">Copiar enlace de esta consulta</button></footer>
+    <footer class="footer"><div class="footer-message"><strong>Juntos, cada aportación cuenta.</strong><span>VaXCuenta · Starbucks México</span></div><span id="footer-cutoff"></span><button type="button" id="copy-link" class="text-button">Compartir avance</button></footer>
   </main>
-  <dialog id="modal"><div class="modal-top"><h2 id="modal-title"></h2><button type="button" class="icon-button" id="modal-close" aria-label="Cerrar">×</button></div><div id="modal-body"></div></dialog>
+  <dialog id="modal" aria-labelledby="modal-title"><div class="modal-top"><h2 id="modal-title"></h2><button type="button" class="button quiet modal-exit" id="modal-close" aria-label="Cerrar">Cerrar <span aria-hidden="true">×</span></button></div><div id="modal-body"></div></dialog>
   <div id="toast" class="toast" role="status" hidden></div>
   <noscript><div class="load-state">Activa JavaScript para consultar VaXCuenta.</div></noscript>
 </body>

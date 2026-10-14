@@ -22,8 +22,9 @@ test('initial load, scopes, drilling, search, refresh failure and install help w
   const tabs=['region','dm','store'].map(view=>{const b=new Element('tab-'+view);b.dataset.view=view;return b;});
   globalThis.location={href:'https://sbx-mex.github.io/VaXCuenta/',search:'',reload(){}};
   globalThis.history={replaceState(_a,_b,url){location.href=String(url);}};
+  const photos=['enrique','jorge'].map(key=>{const b=new Element('photo-'+key);b.dataset.photo=key;return b;});
   const links=[];
-  globalThis.document={baseURI:location.href,body:{append:link=>links.push(link)},createElement:tag=>new Element(tag),getElementById:element,querySelector:selector=>element(selector.slice(1)),querySelectorAll:selector=>selector==='[data-view]'?tabs:[],addEventListener(){},visibilityState:'visible'};
+  globalThis.document={baseURI:location.href,body:{append:link=>links.push(link)},createElement:tag=>new Element(tag),getElementById:element,querySelector:selector=>element(selector.slice(1)),querySelectorAll:selector=>selector==='[data-view]'?tabs:selector==='[data-photo]'?photos:[],addEventListener(){},visibilityState:'visible'};
   Object.defineProperty(globalThis,'navigator',{configurable:true,value:{onLine:true}});
   globalThis.window={addEventListener(){},matchMedia:()=>({matches:false}),isSecureContext:true};
   let fail=false;
@@ -60,8 +61,10 @@ test('initial load, scopes, drilling, search, refresh failure and install help w
   element('about-nav').fire('click');assert.equal(element('about-page').hidden,false);assert.equal(element('dashboard-page').hidden,true);
   element('about-return').fire('click');assert.equal(element('dashboard-page').hidden,false);assert.equal(element('about-page').hidden,true);
   element('review-source').fire('click');assert.equal(element('source-validation').open,true);
-  assert.match(element('comparison-reading').textContent,/tiendas con objetivo/);
-  element('help').fire('click');assert.match(element('modal-body').innerHTML,/participación real en tickets/);
+  assert.match(element('comparison-reading').textContent,/con objetivo/);assert.match(element('source-notes-content').innerHTML,/Meta pendiente.*Semana 49/);assert.match(element('source-notes-content').innerHTML,/Sin registro de campaña/);
+  const beforePhoto=location.href;photos[0].fire('click');assert.equal(element('modal').open,true);assert.match(element('modal-body').innerHTML,/photo-preview.*enrique-cesar.jpeg/);assert.equal(location.href,beforePhoto);element('modal-close').fire('click');assert.equal(element('modal').open,false);
+  photos[1].fire('click');assert.match(element('modal-title').textContent,/Jorge Alcantar/);assert.match(element('modal-body').innerHTML,/jorge-alcantar.jpeg/);element('modal-close').fire('click');
+  element('help').fire('click');assert.equal(element('about-page').hidden,false);assert.equal(element('dashboard-page').hidden,true);
   element('install').fire('click');assert.match(element('modal-body').innerHTML,/Safari/);
   element('modal-close').fire('click');
 });

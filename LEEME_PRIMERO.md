@@ -1,8 +1,14 @@
-# VaXCuenta · Medir toda la campaña
+# VaXCuenta · Consulta breve
 
 ## Aplicar este ZIP
 
 Extrae su contenido en la raíz de sbx-mex/VaXCuenta, respetando las carpetas y reemplazando los archivos del mismo nombre. Contiene sólo cambios necesarios; no reemplaza las fuentes CSV ni Excel. Guarda los cambios en main. El workflow existente valida con Python y JavaScript, genera la app y publica en GitHub Pages.
+
+## Versión visual resumida
+
+Inicio concentra indicadores y resultados. Las advertencias, pendientes de metas, CeCo sin registro y los importes a revisar están en **Acerca de → A revisar → Ver detalle**. La ampliación de fotografías abre dentro de la app; usa **Cerrar** o Escape para regresar. El pie muestra “Juntos, cada aportación cuenta.”
+
+Esta actualización conserva la base de tiendas con objetivo positivo y su cruce con Directorio.xlsx. No cambia los importes ni el corte.
 
 ## Lectura del reporte
 
