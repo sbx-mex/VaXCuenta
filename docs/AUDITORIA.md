@@ -1,16 +1,16 @@
 # Auditoría de VaXCuenta
 
-Información real al **2026-10-12**.
+Información real al **2026-10-13**.
 
-- CSV completo: 10,406 filas; $3,635,868.00.
-- Campaña: 10,288 filas; **$3,631,748.00**.
+- CSV completo: 11,324 filas; $3,916,118.00.
+- Campaña: 11,206 filas; **$3,911,998.00**.
 - Fuera de campaña: 118 filas; $4,120.00.
 - Metas válidas: 8,697 filas por CeCo y semana; sin claves repetidas.
-- Tiendas con meta total positiva: 967; con recaudación: 947.
+- Tiendas con meta total positiva: 967; con recaudación: 948.
 - Claves duplicadas del directorio consolidadas sin sumar importes: 0.
 - Fechas del CSV interpretadas como mes/día/año (10/11/2026 = 11 de octubre).
 - El corte proviene de las fechas dentro de campaña, nunca de la fecha de publicación.
-- Meta total cargada: **$16,353,570.00**; avance contra esa base: **22.21%**.
+- Meta total cargada: **$16,353,570.00**; avance contra esa base: **23.92%**.
 - Sin objetivo: 0 filas; $0.00; excluidas de la evaluación.
 - Conciliación: CSV completo = campaña evaluada + fuera de campaña + campaña sin objetivo.
 
