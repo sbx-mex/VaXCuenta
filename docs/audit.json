@@ -1,14 +1,14 @@
 {
   "status": "verified-with-source-notes",
-  "cutoff": "2026-10-16",
-  "rawRows": 13232,
-  "campaignRows": 13114,
+  "cutoff": "2026-10-17",
+  "rawRows": 13289,
+  "campaignRows": 13171,
   "excludedRows": 118,
-  "rawCents": 449628800,
-  "campaignCents": 449216800,
+  "rawCents": 451015800,
+  "campaignCents": 450603800,
   "excludedCents": 412000,
-  "sourceCampaignCents": 449216800,
-  "sourceCampaignRows": 13114,
+  "sourceCampaignCents": 450603800,
+  "sourceCampaignRows": 13171,
   "excludedNoObjectiveCents": 0,
   "excludedNoObjectiveRows": 0,
   "excludedNoObjectiveStores": [],
@@ -2927,7 +2927,7 @@
     ]
   },
   "campaignGoalComplete": false,
-  "campaignCompletion": 0.27469035812975395,
+  "campaignCompletion": 0.27553849098392585,
   "objectiveRows": 8697,
   "targetStores": 967,
   "actualStores": 948,
@@ -3122,10 +3122,11 @@
     "2026-10-13": 918,
     "2026-10-14": 915,
     "2026-10-15": 913,
-    "2026-10-16": 79
+    "2026-10-16": 79,
+    "2026-10-17": 57
   },
   "sourceHashes": {
-    "Va X Cuenta.csv": "d52ad566fd57df59d969f52430360eedc4afae0bad1b2802bc97f40a7532cc33",
+    "Va X Cuenta.csv": "d545d359e18178cfeac1c07921dcb90840c44ed77ef1c61e5044acd35d356a90",
     "VaxCuenta Objetivos 26.xlsx": "c75c363ea6dec916e3824f9daba7bc6dc078aff08af9dbe7f84d56ae2e4e3dd6",
     "Directorio.xlsx": "814d55081051710828ee87eee979d0db710815a9b5c7215d8585c2e3e44befa6",
     "config.json": "107683faba31e488347fa5ab0e8924e6f0491449b51eb82965633e3b06b9817f"
