@@ -1,5 +1,5 @@
 /* VERSION is replaced by the build; each project path owns its own cache. */
-const VERSION = '138c56b41655e2f8';
+const VERSION = 'ce13e18937cbde0a';
 const BASE = new URL('./', self.registration.scope);
 const PREFIX = `vaxcuenta-${BASE.pathname}-`;
 const CACHE = PREFIX + VERSION;
